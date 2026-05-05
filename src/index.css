@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:wght@300;400;500;600&family=Hind+Siliguri:wght@300;400;500;600;700&family=Tiro+Bangla:ital@0;1&family=Anek+Bangla:wght@100..800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Anek Bangla", "Tiro Bangla", "Playfair Display", serif;
+  --font-sans: "Anek Bangla", "Hind Siliguri", "Poppins", sans-serif;
+  --font-display: "Anek Bangla", sans-serif;
+  
+  --color-brand-cream: #f7f3f0;
+  --color-brand-rose: #f8d7da;
+  --color-brand-blue: #e3f2fd;
+  --color-brand-gold: #C5A059;
+  --color-brand-stone-950: #0c0a09;
+  --color-brand-stone-900: #1c1917;
+  --color-brand-stone-800: #292524;
+  --color-brand-stone-700: #44403c;
+  --color-brand-stone-600: #57534e;
+  --color-brand-stone-500: #78716c;
+  --color-brand-stone-400: #a8a29e;
+  --color-brand-stone-300: #d6d3d1;
+  --color-brand-stone-200: #e7e5e4;
+  --color-brand-stone-100: #f5f5f4;
+  --color-brand-stone-50: #fafaf9;
+  --color-brand-red-500: #ef4444;
+}
+
+@layer base {
+  body {
+    @apply font-sans bg-brand-cream text-brand-stone-800 antialiased overflow-x-hidden;
+  }
+  
+  h1, h2, h3, h4 {
+    @apply font-serif;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-sm border border-white/50 rounded-[2rem] shadow-sm transition-all hover:bg-white/80;
+  }
+  
+  .glass-button {
+    @apply bg-white/95 backdrop-blur-sm border border-white/50 rounded-full hover:bg-white transition-all shadow-md active:scale-95;
+  }
+}
+
+@media print {
+  @page {
+    size: A4;
+    margin: 10mm 15mm;
+  }
+  
+  body {
+    background-color: white !important;
+    background-image: none !important;
+    color: #1c1917 !important;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+  
+  #printable-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .grid {
+    display: grid !important;
+    gap: 1rem !important;
+  }
+
+  /* Single column for print to ensure layout stability */
+  main {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 1.5rem !important;
+  }
+
+  /* Hide portrait section in print as requested for professional look */
+  aside {
+    width: 100% !important;
+  }
+
+  .lg\:col-span-12, .lg\:col-span-9, .lg\:col-span-6, .lg\:col-span-3 {
+    width: 100% !important;
+    grid-column: span 12 / span 12 !important;
+  }
+
+  .glass-card {
+    background: white !important;
+    backdrop-filter: none !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    padding: 1.5rem !important;
+    margin-bottom: 1rem !important;
+    border-radius: 8px !important;
+    page-break-inside: avoid !important;
+  }
+
+  h1 { font-size: 32pt !important; color: #1c1917 !important; font-weight: 800 !important; margin-bottom: 0.5rem !important; }
+  h3 { font-size: 14pt !important; color: #1c1917 !important; font-weight: 700 !important; border-bottom: 1px solid #e2e8f0 !important; padding-bottom: 4px !important; }
+  
+  p, span, div { 
+    color: #334155 !important; 
+    font-size: 10pt !important;
+  }
+
+  .font-display { font-family: sans-serif !important; }
+  .font-serif { font-family: serif !important; }
+
+  /* Force background colors for print */
+  .bg-white\/50, .bg-white\/90, .bg-white { background-color: white !important; }
+  .bg-brand-stone-50 { background-color: #f8fafc !important; }
+  .border-brand-stone-200, .border-white\/60, .border-white\/50 { border-color: #e2e8f0 !important; }
+
+  /* Ensure all motion divs are visible */
+  div[style*="opacity: 0"] {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+}
+
+/* Custom background blobs */
+.bg-blobs {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: -1;
+}
