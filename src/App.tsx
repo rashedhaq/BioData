@@ -137,11 +137,15 @@ const getGoogleDriveLink = (url: string | null) => {
 export default function App() {
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
   const profileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 2500);
+
     // Initialize Particles.js if available
     if (window.particlesJS) {
       try {
@@ -162,6 +166,7 @@ export default function App() {
         console.error("Particles.js init failed", e);
       }
     }
+    return () => clearTimeout(timer);
   }, []);
 
   const handleProfilePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -371,8 +376,51 @@ export default function App() {
       {/* Particles Background Layer */}
       <div id="particles-js" className="fixed inset-0 pointer-events-none z-0 no-print"></div>
 
+      <AnimatePresence>
+        {isLoading && (
+          <motion.div
+            key="preloader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8, ease: "easeInOut" }}
+            className="fixed inset-0 z-[100] bg-brand-cream flex flex-col items-center justify-center p-6 no-print"
+          >
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, ease: "easeOut" }}
+              className="text-center"
+            >
+              <motion.h2 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1.2, ease: "easeOut" }}
+                className="text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold text-brand-stone-900 tracking-tight mb-8"
+              >
+                মোঃ রাশিদুল হক
+              </motion.h2>
+              <div className="w-48 h-[1px] bg-brand-stone-200 relative overflow-hidden mx-auto">
+                <motion.div
+                  initial={{ x: "-100%" }}
+                  animate={{ x: "100%" }}
+                  transition={{ 
+                    duration: 2, 
+                    repeat: Infinity, 
+                    ease: "easeInOut" 
+                  }}
+                  className="absolute inset-0 bg-brand-gold w-1/2"
+                />
+              </div>
+              <p className="mt-4 text-[10px] uppercase tracking-[0.4em] text-brand-stone-400 font-bold">
+                জীবনবৃত্তান্ত লোড হচ্ছে
+              </p>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Main Content */}
-      <div className="relative z-10">
+      <div className={`relative z-10 transition-opacity duration-1000 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
         {/* Floating Action Bar - Fixed Bottom Right */}
         <div className="fixed bottom-6 right-4 z-[60] no-print">
           <motion.button
@@ -575,7 +623,7 @@ export default function App() {
                   <p className="font-display font-bold text-2xl text-brand-stone-900 tracking-tight">সফটওয়্যার ইঞ্জিনিয়ার</p>
                   <p className="text-[10px] text-brand-stone-500 uppercase tracking-widest font-black font-display">প্রাইভেট আইটি কোম্পানি</p>
                   <p className="text-sm text-brand-stone-600 mt-3 font-medium leading-relaxed font-sans italic">
-                    "বর্তমানে একটি বেসরকারি আইটি প্রতিষ্ঠানে কর্মরত আছি।"
+                    "বর্তমানে একটি বেসরকারি আইটি প্রতিষ্ঠানে কর্মরত"
                   </p>
                 </div>
               </Section>
