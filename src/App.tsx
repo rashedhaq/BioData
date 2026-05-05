@@ -371,51 +371,8 @@ export default function App() {
       {/* Particles Background Layer */}
       <div id="particles-js" className="fixed inset-0 pointer-events-none z-0 no-print"></div>
 
-      <AnimatePresence>
-        {isLoading && (
-          <motion.div
-            key="preloader"
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="fixed inset-0 z-[100] bg-brand-cream flex flex-col items-center justify-center p-6 no-print"
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 1, ease: "easeOut" }}
-              className="text-center"
-            >
-              <motion.h2 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1.2, ease: "easeOut" }}
-                className="text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold text-brand-stone-900 tracking-tight mb-8"
-              >
-                মোঃ রাশিদুল হক
-              </motion.h2>
-              <div className="w-48 h-[1px] bg-brand-stone-200 relative overflow-hidden mx-auto">
-                <motion.div
-                  initial={{ x: "-100%" }}
-                  animate={{ x: "100%" }}
-                  transition={{ 
-                    duration: 2, 
-                    repeat: Infinity, 
-                    ease: "easeInOut" 
-                  }}
-                  className="absolute inset-0 bg-brand-gold w-1/2"
-                />
-              </div>
-              <p className="mt-4 text-[10px] uppercase tracking-[0.4em] text-brand-stone-400 font-bold">
-                জীবনবৃত্তান্ত লোড হচ্ছে
-              </p>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* Main Content */}
-      <div>
+      <div className="relative z-10">
         {/* Floating Action Bar - Fixed Bottom Right */}
         <div className="fixed bottom-6 right-4 z-[60] no-print">
           <motion.button
@@ -437,16 +394,16 @@ export default function App() {
 
         {/* Theme Background Blobs */}
         <div className="bg-blobs no-print">
-        <div className="absolute -top-[10%] -left-[5%] w-[600px] h-[600px] bg-brand-rose rounded-full blur-[120px] opacity-40"></div>
-        <div className="absolute bottom-[20%] -right-20 w-[700px] h-[700px] bg-brand-blue rounded-full blur-[140px] opacity-30"></div>
-      </div>
+          <div className="absolute -top-[10%] -left-[5%] w-[600px] h-[600px] bg-brand-rose rounded-full blur-[120px] opacity-40"></div>
+          <div className="absolute bottom-[20%] -right-20 w-[700px] h-[700px] bg-brand-blue rounded-full blur-[140px] opacity-30"></div>
+        </div>
 
-        <div className="max-w-6xl px-4 sm:px-12 py-8 sm:py-12 mx-auto relative px-4" id="printable-content">
+        <div className="max-w-6xl px-4 sm:px-12 py-8 sm:py-12 mx-auto relative" id="printable-content">
           {/* Header Section */}
           <header className="relative flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 border-b border-brand-stone-200 pb-8 gap-6 sm:gap-8">
             <motion.div
               initial={{ opacity: 0, x: -30 }}
-              animate={isLoading ? { opacity: 0, x: -30 } : { opacity: 1, x: 0 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
               className="text-left"
             >
@@ -460,7 +417,7 @@ export default function App() {
             
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
-              animate={isLoading ? { opacity: 0, y: 10 } : { opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
               className="flex flex-wrap gap-2.5 sm:gap-4 text-[12px] sm:text-[13px] font-bold text-brand-stone-700 no-print items-center"
             >
@@ -487,7 +444,7 @@ export default function App() {
             {/* Left Column: Portrait & Stats */}
             <motion.aside 
               initial={{ opacity: 0, y: 20 }}
-              animate={isLoading ? { opacity: 0, y: 20 } : { opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.6 }}
               className="lg:col-span-3 flex flex-col gap-8"
             >
@@ -542,7 +499,7 @@ export default function App() {
             {/* Center Column: Detailed Info */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
-              animate={isLoading ? { opacity: 0, y: 30 } : { opacity: 1, y: 0 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.8 }}
               className="lg:col-span-6 flex flex-col gap-8"
             >
@@ -681,7 +638,7 @@ export default function App() {
             </motion.div>
             <motion.aside 
               initial={{ opacity: 0, x: 20 }}
-              animate={isLoading ? { opacity: 0, x: 20 } : { opacity: 1, x: 0 }}
+              animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.8, delay: 1 }}
               className="lg:col-span-3 flex flex-col gap-6 no-print"
             >
@@ -748,7 +705,7 @@ export default function App() {
 
         <motion.footer 
           initial={{ opacity: 0 }}
-          animate={isLoading ? { opacity: 0 } : { opacity: 1 }}
+          animate={{ opacity: 1 }}
           transition={{ duration: 0.8, delay: 1.2 }}
           className="mt-16 pt-8 border-t border-brand-stone-200 flex justify-between items-center text-[10px] text-brand-stone-400 font-black tracking-widest uppercase font-display"
         >
@@ -759,7 +716,6 @@ export default function App() {
           </div>
         </motion.footer>
       </div>
-    </div>
 
       {/* Photo Lightbox Modal - Minimal Full View */}
       <AnimatePresence>
@@ -801,6 +757,7 @@ export default function App() {
         )}
       </AnimatePresence>
       </div>
+    </div>
   );
 }
 
