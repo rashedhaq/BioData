@@ -422,21 +422,57 @@ export default function App() {
       {/* Main Content */}
       <div className={`relative z-10 transition-opacity duration-1000 ${isLoading ? 'opacity-0' : 'opacity-100'}`}>
         {/* Floating Action Bar - Fixed Bottom Right */}
-        <div className="fixed bottom-6 right-4 z-[60] no-print">
+        <div className="fixed bottom-6 right-6 z-[60] no-print">
           <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
+            whileHover={{ 
+              scale: 1.05,
+              y: -3,
+            }}
+            animate={{
+              boxShadow: [
+                "0 0 20px rgba(52, 211, 153, 0.4)",
+                "0 0 40px rgba(52, 211, 153, 0.7)",
+                "0 0 20px rgba(52, 211, 153, 0.4)"
+              ]
+            }}
+            transition={{
+              boxShadow: {
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              },
+              scale: { duration: 0.2 },
+              y: { duration: 0.2 }
+            }}
+            whileTap={{ scale: 0.96 }}
             onClick={handleDownloadPDF}
             disabled={isDownloading}
-            className="flex items-center gap-2 glass-button px-5 py-2.5 text-brand-stone-800 font-black uppercase tracking-[0.25em] text-[9px] shadow-xl no-print disabled:opacity-50"
+            className="group relative flex items-center gap-2 bg-emerald-400/40 backdrop-blur-3xl border-2 border-emerald-300 text-emerald-950 px-4 py-2 rounded-full no-print disabled:opacity-50 overflow-hidden"
             id="print-cv-btn"
           >
-            {isDownloading ? (
-              <Loader2 size={14} className="animate-spin" />
-            ) : (
-              <Download size={14} />
-            )}
-            {isDownloading ? 'তৈরি হচ্ছে...' : 'পিডিএফ ডাউনলোড'}
+            {/* Ultra Bright Reflection Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-300 via-white/40 to-emerald-200 opacity-40 group-hover:opacity-70 transition-opacity"></div>
+            
+            <div className="relative flex items-center gap-1.5">
+              <div className="bg-white/60 p-1 rounded-full border border-white flex items-center justify-center shadow-[0_0_20px_rgba(255,255,255,0.8)]">
+                {isDownloading ? (
+                  <Loader2 size={12} className="animate-spin text-emerald-800" />
+                ) : (
+                  <Download size={12} className="text-emerald-900 group-hover:scale-110 transition-transform" />
+                )}
+              </div>
+              <span className="font-display font-black uppercase tracking-[0.15em] text-[10px] antialiased text-emerald-950 drop-shadow-[0_1px_2px_rgba(255,255,255,0.8)]">
+                {isDownloading ? 'তৈরি...' : 'PDF ডাউনলোড'}
+              </span>
+            </div>
+            
+            {/* High-Speed Shimmer Sweep */}
+            <motion.div 
+              initial={{ x: "-100%", skewX: -20 }}
+              animate={{ x: "250%" }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: "easeInOut", repeatDelay: 0.5 }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/80 to-transparent pointer-events-none"
+            />
           </motion.button>
         </div>
 
@@ -446,44 +482,69 @@ export default function App() {
           <div className="absolute bottom-[20%] -right-20 w-[700px] h-[700px] bg-brand-blue rounded-full blur-[140px] opacity-30"></div>
         </div>
 
-        <div className="max-w-6xl px-4 sm:px-12 py-8 sm:py-12 mx-auto relative" id="printable-content">
+      <div className="max-w-6xl px-4 sm:px-12 py-8 sm:py-12 mx-auto relative" id="printable-content">
+        {/* Floating Background Accent */}
+        <motion.div 
+          animate={{ 
+            y: [0, -20, 0],
+            rotate: [0, 5, 0]
+          }}
+          transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-20 right-10 w-64 h-64 bg-brand-gold/5 blur-[100px] pointer-events-none"
+        ></motion.div>
           {/* Header Section */}
-          <header className="relative flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-12 border-b border-brand-stone-200 pb-8 gap-6 sm:gap-8">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-              className="text-left"
-            >
-              <h1 className="text-4xl sm:text-7xl lg:text-8xl font-display font-extrabold text-brand-stone-900 tracking-tight leading-tight">
-                মোঃ রাশিদুল হক
-              </h1>
-              <p className="mt-2 text-brand-stone-600 font-display font-bold text-lg sm:text-2xl">
-                মিরপুর ১, ঢাকা-১২১৬
-              </p>
-            </motion.div>
+          <header className="relative flex flex-col md:flex-row md:items-end justify-between mb-16 sm:mb-24 pb-12 gap-8 sm:gap-12">
+            <div className="text-left relative">
+              <motion.div
+                initial={{ opacity: 0, x: -100 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ margin: "-100px", once: false }}
+                transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+                className="overflow-hidden"
+              >
+                <h1 className="text-5xl sm:text-7xl lg:text-9xl font-display font-extrabold text-brand-stone-900 tracking-tighter leading-[0.85] mb-2">
+                  মোঃ রাশিদুল হক
+                </h1>
+              </motion.div>
+              
+              <motion.div
+                initial={{ opacity: 0, x: 100 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ margin: "-100px", once: false }}
+                transition={{ duration: 1.5, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                className="flex items-center gap-4"
+              >
+                <div className="h-px w-12 bg-brand-gold"></div>
+                <p className="text-brand-stone-500 font-display font-bold text-xl sm:text-3xl tracking-tight">
+                  মিরপুর ১, ঢাকা-১২১৬
+                </p>
+              </motion.div>
+            </div>
             
             <motion.div 
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex flex-wrap gap-2.5 sm:gap-4 text-[12px] sm:text-[13px] font-bold text-brand-stone-700 no-print items-center"
+              transition={{ duration: 0.8, delay: 0.8 }}
+              className="flex flex-wrap gap-3 sm:gap-4 text-[12px] sm:text-[13px] font-bold text-brand-stone-700 no-print items-center"
             >
-             <div className="relative group overflow-hidden bg-white/50 text-brand-stone-900 px-5 py-2.5 rounded-2xl shadow-sm border border-brand-gold/30 uppercase tracking-[0.2em] text-[10px] font-black font-display transition-all hover:scale-105 active:scale-95">
-               <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent group-hover:left-full transition-all duration-1000"></div>
+             <motion.div 
+               whileHover={{ scale: 1.05 }}
+               className="relative group overflow-hidden bg-brand-stone-900 text-brand-cream px-6 py-3 rounded-2xl shadow-xl uppercase tracking-[0.25em] text-[10px] font-black font-display"
+             >
+               <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:left-full transition-all duration-1000"></div>
                IT Professional
-             </div>
-             <div className="flex items-center gap-3 bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-2xl shadow-sm border border-white/60 transition-all hover:bg-white">
-                <div className="p-1.5 bg-brand-stone-50 rounded-lg">
-                  <Phone size={12} className="text-brand-stone-500" />
+             </motion.div>
+             <div className="flex items-center gap-4 bg-white/40 backdrop-blur-md px-6 py-3 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.02)] border border-white/60 transition-all hover:bg-white/80 group">
+                <div className="p-2 bg-brand-stone-50 rounded-xl group-hover:bg-brand-gold/10 transition-colors">
+                  <Phone size={14} className="text-brand-stone-500 group-hover:text-brand-gold" />
                 </div>
-                <span className="font-sans font-extrabold text-brand-stone-900 leading-none">01912196464</span>
+                <span className="font-sans font-black text-brand-stone-900 leading-none tracking-tight">01912196464</span>
              </div>
-             <div className="flex items-center gap-3 bg-white/90 backdrop-blur-md px-5 py-2.5 rounded-2xl shadow-sm border border-white/60 transition-all hover:bg-white lowercase">
-                <div className="p-1.5 bg-brand-stone-50 rounded-lg">
-                  <Mail size={12} className="text-brand-stone-500" />
+             <div className="flex items-center gap-4 bg-white/40 backdrop-blur-md px-6 py-3 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.02)] border border-white/60 transition-all hover:bg-white/80 group lowercase">
+                <div className="p-2 bg-brand-stone-50 rounded-xl group-hover:bg-brand-gold/10 transition-colors">
+                  <Mail size={14} className="text-brand-stone-500 group-hover:text-brand-gold" />
                 </div>
-                <span className="font-sans font-extrabold text-brand-stone-900 leading-none tracking-tight">rashidulhaq015@gmail.com</span>
+                <span className="font-sans font-black text-brand-stone-900 leading-none tracking-tighter">rashidulhaq015@gmail.com</span>
              </div>
             </motion.div>
           </header>
@@ -492,7 +553,8 @@ export default function App() {
             {/* Left Column: Portrait & Stats */}
             <motion.aside 
               initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false }}
               transition={{ duration: 0.8, delay: 0.6 }}
               className="lg:col-span-3 flex flex-col gap-8"
             >
@@ -537,7 +599,7 @@ export default function App() {
               </motion.div>
               */}
 
-              <Section title="জীবন দর্শন" compact>
+              <Section title="জীবন দর্শন" compact direction="down">
               <p className="text-sm text-brand-stone-600 leading-relaxed font-sans italic">
                 "আল্লাহ প্রদত্ত রাসূল (সাঃ) প্রদর্শিত বিধান অনুযায়ী মানুষের সার্বিক জীবনের পুনর্বিন্যাস সাধন করে আল্লাহর সন্তুষ্টি অর্জন"
               </p>
@@ -547,12 +609,13 @@ export default function App() {
             {/* Center Column: Detailed Info */}
             <motion.div 
               initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: false }}
               transition={{ duration: 0.8, delay: 0.8 }}
               className="lg:col-span-6 flex flex-col gap-8"
             >
             <div className="flex flex-col gap-8">
-              <Section title="শিক্ষাগত যোগ্যতা">
+              <Section title="শিক্ষাগত যোগ্যতা" direction="up">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
                   <CardItem>
                     <div className="flex items-center gap-2 mb-1">
@@ -606,7 +669,7 @@ export default function App() {
                 </div>
               </Section>
               
-              <Section title="ব্যক্তিগত তথ্য">
+              <Section title="ব্যক্তিগত তথ্য" direction="right">
                 <div className="space-y-1">
                   <StatItem label="জন্ম তারিখ" value="১৯/০৭/২০০১" />
                   <StatItem label="জাতীয়তা" value="বাংলাদেশি" />
@@ -618,7 +681,7 @@ export default function App() {
                 </div>
               </Section>
               
-              <Section title="পেশা">
+              <Section title="পেশা" direction="down">
                 <div className="space-y-1">
                   <p className="font-display font-bold text-2xl text-brand-stone-900 tracking-tight">সফটওয়্যার ইঞ্জিনিয়ার</p>
                   <p className="text-[10px] text-brand-stone-500 uppercase tracking-widest font-black font-display">প্রাইভেট আইটি কোম্পানি</p>
@@ -629,7 +692,7 @@ export default function App() {
               </Section>
             </div>
 
-            <Section title="পারিবারিক তথ্য">
+            <Section title="পারিবারিক তথ্য" direction="left">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <div className="space-y-6">
                   <CardItem>
@@ -659,7 +722,7 @@ export default function App() {
               </div>
             </Section>
 
-            <Section title="ঠিকানা">
+            <Section title="ঠিকানা" direction="right">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <CardItem>
                   <p className="flex flex-col">
@@ -686,7 +749,8 @@ export default function App() {
             </motion.div>
             <motion.aside 
               initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: false }}
               transition={{ duration: 0.8, delay: 1 }}
               className="lg:col-span-3 flex flex-col gap-6 no-print"
             >
@@ -697,9 +761,13 @@ export default function App() {
             </div>
 
             <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-              {GALLERY_PHOTOS.map((photo) => (
+              {GALLERY_PHOTOS.map((photo, index) => (
                 <motion.div
                   key={photo.id}
+                  initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                  whileInView={{ opacity: 1, scale: 1, y: 0 }}
+                  viewport={{ once: false }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
                   whileHover={{ scale: 1.02, y: -2 }}
                   className="relative group glass-card p-2 shadow-sm aspect-square lg:aspect-[4/5] cursor-pointer"
                   onClick={() => setSelectedPhoto(photo)}
@@ -732,19 +800,47 @@ export default function App() {
                   <Phone size={14} className="text-brand-stone-400" />
                   01912196464
                 </p>
-                <div className="flex gap-2.5 pt-2 no-print">
-                  <a href="http://facebook.com/rashidul.haq0" target="_blank" rel="noopener noreferrer" className="p-2.5 glass-button text-brand-stone-600 hover:text-[#1877F2]">
-                    <Facebook size={18} />
-                  </a>
-                  <a href="https://www.instagram.com/md.rashidul.haq/?hl=en" target="_blank" rel="noopener noreferrer" className="p-2.5 glass-button text-brand-stone-600 hover:text-[#E4405F]">
-                    <Instagram size={18} />
-                  </a>
-                  <a href="https://www.linkedin.com/in/rashidulhaq/" target="_blank" rel="noopener noreferrer" className="p-2.5 glass-button text-brand-stone-600 hover:text-[#0A66C2]">
-                    <Linkedin size={18} />
-                  </a>
-                  <a href="https://wa.me/8801912196464" target="_blank" rel="noopener noreferrer" className="p-2.5 glass-button text-brand-stone-600 hover:text-[#25D366]">
-                    <Phone size={18} />
-                  </a>
+                <div className="flex gap-3 pt-3 no-print">
+                  <motion.a 
+                    whileHover={{ y: -4, scale: 1.1, rotate: -5 }}
+                    whileTap={{ scale: 0.9 }}
+                    href="http://facebook.com/rashidul.haq0" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="w-11 h-11 flex items-center justify-center rounded-2xl bg-[#1877F2]/10 backdrop-blur-xl border border-[#1877F2]/20 text-[#1877F2] shadow-sm hover:shadow-[0_10px_25px_-8px_rgba(24,119,242,0.5)] hover:bg-[#1877F2] hover:text-white transition-all duration-500"
+                  >
+                    <Facebook size={20} weight="fill" />
+                  </motion.a>
+                  <motion.a 
+                    whileHover={{ y: -4, scale: 1.1, rotate: 5 }}
+                    whileTap={{ scale: 0.9 }}
+                    href="https://www.instagram.com/md.rashidul.haq/?hl=en" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="w-11 h-11 flex items-center justify-center rounded-2xl bg-[#E4405F]/10 backdrop-blur-xl border border-[#E4405F]/20 text-[#E4405F] shadow-sm hover:shadow-[0_10px_25px_-8px_rgba(228,64,95,0.5)] hover:bg-gradient-to-tr hover:from-[#f9ce34] hover:via-[#ee2a7b] hover:to-[#6228d7] hover:text-white transition-all duration-500"
+                  >
+                    <Instagram size={20} />
+                  </motion.a>
+                  <motion.a 
+                    whileHover={{ y: -4, scale: 1.1, rotate: -5 }}
+                    whileTap={{ scale: 0.9 }}
+                    href="https://www.linkedin.com/in/rashidulhaq/" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="w-11 h-11 flex items-center justify-center rounded-2xl bg-[#0A66C2]/10 backdrop-blur-xl border border-[#0A66C2]/20 text-[#0A66C2] shadow-sm hover:shadow-[0_10px_25px_-8px_rgba(10,102,194,0.5)] hover:bg-[#0A66C2] hover:text-white transition-all duration-500"
+                  >
+                    <Linkedin size={20} />
+                  </motion.a>
+                  <motion.a 
+                    whileHover={{ y: -4, scale: 1.1, rotate: 5 }}
+                    whileTap={{ scale: 0.9 }}
+                    href="https://wa.me/8801912196464" 
+                    target="_blank" 
+                    rel="noopener noreferrer" 
+                    className="w-11 h-11 flex items-center justify-center rounded-2xl bg-[#25D366]/10 backdrop-blur-xl border border-[#25D366]/20 text-[#25D366] shadow-sm hover:shadow-[0_10px_25px_-8px_rgba(37,211,102,0.5)] hover:bg-[#25D366] hover:text-white transition-all duration-500"
+                  >
+                    <Phone size={20} />
+                  </motion.a>
                 </div>
               </div>
             </div>
@@ -753,7 +849,8 @@ export default function App() {
 
         <motion.footer 
           initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: false }}
           transition={{ duration: 0.8, delay: 1.2 }}
           className="mt-16 pt-8 border-t border-brand-stone-200 flex justify-between items-center text-[10px] text-brand-stone-400 font-black tracking-widest uppercase font-display"
         >
@@ -812,26 +909,63 @@ export default function App() {
 function Section({ 
   title, 
   children, 
-  compact = false 
+  compact = false,
+  direction = "up"
 }: { 
   title: string; 
   children: React.ReactNode; 
   compact?: boolean;
+  direction?: "up" | "down" | "left" | "right";
 }) {
+  const directions = {
+    up: { y: 40, x: 0 },
+    down: { y: -40, x: 0 },
+    left: { x: -40, y: 0 },
+    right: { x: 40, y: 0 }
+  };
+
   return (
     <motion.div 
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.6, ease: "easeOut" }}
-      className={`glass-card p-6 sm:p-8 flex flex-col gap-5 print-break-inside-avoid shadow-lg ${compact ? 'py-6 px-5' : ''}`}
+      initial={{ opacity: 0, ...directions[direction] }}
+      whileInView={{ opacity: 1, x: 0, y: 0 }}
+      viewport={{ once: false, margin: "-100px" }}
+      transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+      className={`glass-card group relative overflow-hidden p-6 sm:p-8 flex flex-col gap-6 print-break-inside-avoid shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-white/40 backdrop-blur-md rounded-3xl ${compact ? 'py-7 px-6' : ''}`}
     >
-      <h3 className="text-sm font-black text-brand-stone-700 uppercase tracking-[0.25em] flex items-center gap-3 font-display">
-        {title} <span className="h-px flex-1 bg-brand-stone-300"></span>
-      </h3>
-      <div className="w-full font-sans">
-        {children}
+      {/* Dynamic Background Glow */}
+      <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-gold/0 group-hover:bg-brand-gold/10 rounded-full blur-3xl pointer-events-none transition-colors duration-700"></div>
+      
+      <div className="flex items-center gap-4 relative">
+        <h3 className="text-[10px] font-black text-brand-stone-500 uppercase tracking-[0.3em] font-display transition-colors group-hover:text-brand-gold">
+          {title}
+        </h3>
+        <div className="h-[2px] bg-brand-stone-100 flex-1 relative overflow-hidden rounded-full">
+          <motion.div 
+            initial={{ x: "-100%" }}
+            whileInView={{ x: "0%" }}
+            viewport={{ once: false }}
+            transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+            className="absolute inset-0 bg-gradient-to-r from-brand-gold/0 via-brand-gold/50 to-brand-gold/0"
+          ></motion.div>
+        </div>
       </div>
+      <motion.div 
+        variants={{
+          hidden: { opacity: 0 },
+          show: {
+            opacity: 1,
+            transition: {
+              staggerChildren: 0.1
+            }
+          }
+        }}
+        initial="hidden"
+        whileInView="show"
+        viewport={{ once: false }}
+        className="w-full font-sans relative"
+      >
+        {children}
+      </motion.div>
     </motion.div>
   );
 }
@@ -839,10 +973,13 @@ function Section({
 function CardItem({ children }: { children: React.ReactNode }) {
   return (
     <motion.div 
-      whileHover={{ scale: 1.02, x: 5 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ type: "spring", stiffness: 400, damping: 17 }}
-      className="p-3 -m-3 rounded-2xl hover:bg-white/50 transition-colors"
+      variants={{
+        hidden: { opacity: 0, x: -10 },
+        show: { opacity: 1, x: 0 }
+      }}
+      whileHover={{ scale: 1.01, x: 4 }}
+      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+      className="p-4 -m-4 rounded-2xl hover:bg-white/40 transition-all duration-300 border border-transparent hover:border-brand-gold/10 group"
     >
       {children}
     </motion.div>
@@ -852,46 +989,62 @@ function CardItem({ children }: { children: React.ReactNode }) {
 function StatItem({ label, value }: { label: string; value: string }) {
   return (
     <motion.div 
-      whileHover={{ x: 5 }}
-      className="flex justify-between items-center text-sm py-2.5 border-b border-brand-stone-200 last:border-0"
+      variants={{
+        hidden: { opacity: 0, scale: 0.95 },
+        show: { opacity: 1, scale: 1 }
+      }}
+      className="flex justify-between items-center text-sm py-4 border-b border-brand-stone-100 last:border-0 group transition-all hover:bg-white/40 -mx-4 px-4 rounded-xl"
     >
-      <span className="text-brand-stone-600 font-bold uppercase tracking-wider text-[10px] font-display">{label}</span>
-      <span className="font-bold text-brand-stone-900 font-sans">{value}</span>
+      <span className="text-brand-stone-400 font-bold uppercase tracking-[0.25em] text-[8.5px] font-display group-hover:text-brand-stone-700 transition-colors">{label}</span>
+      <span className="font-bold text-brand-stone-900 font-sans tracking-tight group-hover:text-brand-gold transition-all group-hover:scale-105 origin-right">{value}</span>
     </motion.div>
   );
 }
 
 function InfoCard({ label, value, icon, color }: { label: string; value: string; icon: React.ReactNode; color: string }) {
   const colorMap: Record<string, string> = {
-    emerald: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    blue: 'bg-blue-50 text-blue-600 border-blue-100',
-    rose: 'bg-rose-50 text-rose-600 border-rose-100',
-    amber: 'bg-amber-50 text-amber-600 border-amber-100',
-    red: 'bg-red-50 text-red-600 border-red-100',
-    stone: 'bg-stone-50 text-stone-600 border-stone-100',
-    indigo: 'bg-indigo-50 text-indigo-600 border-indigo-100',
-    cyan: 'bg-cyan-50 text-cyan-600 border-cyan-100',
+    emerald: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 shadow-emerald-500/5',
+    blue: 'bg-blue-500/10 text-blue-600 border-blue-500/20 shadow-blue-500/5',
+    rose: 'bg-rose-500/10 text-rose-600 border-rose-500/20 shadow-rose-500/5',
+    amber: 'bg-amber-500/10 text-amber-600 border-amber-500/20 shadow-amber-500/5',
+    red: 'bg-red-500/10 text-red-600 border-red-500/20 shadow-red-500/5',
+    stone: 'bg-stone-500/10 text-stone-600 border-stone-500/20 shadow-stone-500/5',
+    indigo: 'bg-indigo-500/10 text-indigo-600 border-indigo-500/20 shadow-indigo-500/5',
+    cyan: 'bg-cyan-500/10 text-cyan-600 border-cyan-500/20 shadow-cyan-500/5',
   };
 
   const selectedColor = colorMap[color] || colorMap.stone;
 
   return (
     <motion.div 
-      whileHover={{ y: -5, scale: 1.02 }}
-      className="group relative bg-white/60 backdrop-blur-sm p-5 rounded-3xl border border-white/60 shadow-sm transition-all hover:shadow-xl hover:bg-white active:scale-95"
+      initial={{ opacity: 0, y: 15, scale: 0.98 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      whileHover={{ y: -10, scale: 1.03, rotate: 1 }}
+      viewport={{ once: false }}
+      transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      className="group relative bg-white/40 backdrop-blur-md p-6 rounded-[2rem] border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.02)] transition-all duration-500 hover:shadow-[0_20px_50px_rgba(0,0,0,0.08)] hover:bg-white/90 active:scale-95 overflow-hidden"
     >
-      <div className={`w-10 h-10 rounded-2xl ${selectedColor} border flex items-center justify-center mb-4 transition-transform group-hover:rotate-12`}>
+      {/* High-end Glass Reflection */}
+      <div className="absolute inset-0 bg-gradient-to-tr from-white/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+      
+      {/* Subtle Bottom Glow linked to brand color */}
+      <div className={`absolute -bottom-10 -right-10 w-32 h-32 ${selectedColor.split(' ')[0]} rounded-full blur-3xl opacity-0 group-hover:opacity-30 transition-all duration-1000 group-hover:scale-150`}></div>
+      
+      <div className={`w-14 h-14 rounded-2xl ${selectedColor} border flex items-center justify-center mb-6 transition-all duration-700 group-hover:scale-110 group-hover:rotate-[-8deg] shadow-lg`}>
         {icon}
       </div>
-      <div className="space-y-1">
-        <p className="text-[10px] uppercase tracking-[0.2em] font-black text-brand-stone-400 font-display">
+      <div className="space-y-2">
+        <p className="text-[9px] uppercase font-black tracking-[0.3em] text-brand-stone-400 font-display group-hover:text-brand-stone-500 transition-colors">
           {label}
         </p>
-        <p className="text-base font-bold text-brand-stone-900 font-sans tracking-tight">
+        <p className="text-[1.05rem] font-bold text-brand-stone-900 font-sans tracking-tight leading-tight">
           {value}
         </p>
       </div>
-      <div className="absolute top-4 right-4 w-1.5 h-1.5 rounded-full bg-brand-stone-200 group-hover:bg-brand-gold transition-colors"></div>
+      
+      <div className="absolute top-6 right-6">
+        <div className="w-2 h-2 rounded-full bg-brand-stone-100 group-hover:bg-brand-gold group-hover:scale-150 transition-all duration-500"></div>
+      </div>
     </motion.div>
   );
 }
