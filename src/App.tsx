@@ -330,36 +330,46 @@ export default function App() {
                 box-sizing: border-box !important;
                 font-family: 'Hind Siliguri', sans-serif !important;
                 color: #1e293b !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
               }
               
               body { background: white !important; margin: 0 !important; padding: 0 !important; }
               
               #printable-content { 
                 background: white !important; 
-                padding: 40px !important; 
+                padding: 15mm !important; 
                 width: 100% !important;
                 max-width: 1000px !important;
                 margin: 0 auto !important;
               }
 
-              h1 { font-size: 48px !important; margin-bottom: 8px !important; font-weight: 700 !important; }
+              h1 { font-size: 32px !important; margin-bottom: 2px !important; font-weight: 800 !important; color: #0f172a !important; letter-spacing: -0.02em !important; }
+              p.text-brand-stone-600 { font-size: 14px !important; color: #64748b !important; }
+              
               h3 { 
-                font-size: 26px !important; 
+                font-size: 18px !important; 
                 font-weight: 700 !important; 
-                margin-top: 35px !important; 
-                display: block !important; 
-                border-bottom: 2px solid #1e293b !important; 
-                padding-bottom: 10px !important; 
-                margin-bottom: 20px !important; 
+                margin-top: 25px !important; 
+                display: flex !important;
+                align-items: center !important;
+                color: #0f172a !important;
+                border-left: 3px solid #1e293b !important;
+                padding-left: 10px !important;
+                margin-bottom: 12px !important;
+                background: #f8fafc !important;
+                padding-top: 6px !important;
+                padding-bottom: 6px !important;
               }
-              p { font-size: 14px !important; line-height: 1.6 !important; }
+              
+              p { font-size: 12px !important; line-height: 1.5 !important; color: #334155 !important; }
 
               .glass-card { 
                 background: white !important; 
-                border: 1px solid #e2e8f0 !important; 
-                border-radius: 12px !important;
-                padding: 24px !important;
-                margin-bottom: 20px !important;
+                border: 1px solid #f1f5f9 !important; 
+                border-radius: 8px !important;
+                padding: 16px !important;
+                margin-bottom: 12px !important;
                 display: block !important;
                 page-break-inside: avoid !important;
                 box-shadow: none !important;
@@ -376,12 +386,14 @@ export default function App() {
                 display: flex !important;
                 flex-wrap: wrap !important;
                 gap: 0 !important;
-                width: 100% !important;
+                width: calc(100% + 16px) !important;
+                margin-left: -8px !important;
               }
               
               .md\\:grid-cols-2 > div, [class*="grid-cols-2"] > div {
                 width: 50% !important;
-                padding-right: 15px !important;
+                padding: 0 8px !important;
+                margin-bottom: 2px !important;
               }
 
               /* Personal Info entries */
@@ -389,34 +401,36 @@ export default function App() {
                 display: flex !important;
                 justify-content: space-between !important;
                 align-items: center !important;
-                border-bottom: 1px solid #f1f5f9 !important;
-                padding: 10px 0 !important;
+                border-bottom: 1px solid #f8fafc !important;
+                padding: 8px 0 !important;
                 width: 100% !important;
               }
               
-              .tracking-\[0\\.15em\] { font-size: 12px !important; font-weight: 600 !important; text-transform: none !important; color: #64748b !important; letter-spacing: 0 !important; }
-              .text-\[14px\] { font-size: 14px !important; font-weight: 700 !important; }
+              .tracking-\[0\\.15em\] { font-size: 11px !important; font-weight: 500 !important; text-transform: uppercase !important; color: #94a3b8 !important; letter-spacing: 0.05em !important; }
+              .text-\[14px\] { font-size: 12px !important; font-weight: 600 !important; color: #1e293b !important; }
 
-              /* Education Section cleanup */
-              .flex.items-center.gap-2.mb-1 { display: flex !important; align-items: center !important; margin-bottom: 5px !important; }
-              .text-lg.sm\\:text-xl { font-size: 20px !important; font-weight: 700 !important; }
-              .text-\\[10px\\]\\.sm\\:text-\\[11px\\] { font-size: 13px !important; color: #475569 !important; margin-top: 4px !important; }
-              .text-brand-stone-600.mt-1 { font-size: 14px !important; color: #334155 !important; border-top: 1px dashed #e2e8f0 !important; padding-top: 5px !important; margin-top: 8px !important; }
+              /* Education Section */
+              .flex.items-center.gap-2.mb-1 { display: flex !important; align-items: center !important; margin-bottom: 4px !important; }
+              .text-lg.sm\\:text-xl { font-size: 15px !important; font-weight: 700 !important; color: #0f172a !important; }
+              .text-\\[10px\\]\\.sm\\:text-\\[11px\\] { font-size: 11px !important; color: #94a3b8 !important; margin-top: 2px !important; }
+              .text-brand-stone-600.mt-1 { font-size: 12px !important; color: #475569 !important; border-top: 1px dashed #f1f5f9 !important; padding-top: 4px !important; margin-top: 4px !important; }
 
               /* Cleanup background containers */
               .bg-white\\/20, .backdrop-blur-md, .rounded-2xl { 
-                background: transparent !important; 
-                border: none !important; 
+                background: white !important; 
+                border: 1px solid #f1f5f9 !important; 
                 box-shadow: none !important; 
+                border-radius: 8px !important;
               }
               
               .bg-brand-stone-100 { 
                 background: #f1f5f9 !important; 
-                padding: 2px 10px !important; 
-                border-radius: 6px !important; 
-                font-size: 13px !important; 
-                color: #475569 !important;
-                margin-left: 10px !important;
+                padding: 2px 8px !important; 
+                border-radius: 4px !important; 
+                font-size: 10px !important; 
+                color: #64748b !important;
+                font-weight: 700 !important;
+                display: inline-block !important;
               }
 
               /* Hide UI/Interactive */
@@ -425,13 +439,13 @@ export default function App() {
               }
 
               footer {
-                margin-top: 60px !important;
-                border-top: 1px solid #e2e8f0 !important;
-                padding-top: 20px !important;
+                margin-top: 40px !important;
+                border-top: 1px solid #f1f5f9 !important;
+                padding-top: 15px !important;
                 display: flex !important;
                 justify-content: space-between !important;
-                color: #64748b !important;
-                font-size: 14px !important;
+                color: #cbd5e1 !important;
+                font-size: 11px !important;
               }
             `;
             clonedDoc.head.appendChild(style);
@@ -475,7 +489,7 @@ export default function App() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1.2, ease: "easeOut" }}
-                className="text-2xl sm:text-4xl lg:text-5xl font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-stone-900 via-indigo-950 to-brand-stone-900 tracking-tight mb-8"
+                className="text-2xl sm:text-4xl lg:text-5xl font-display font-extrabold text-brand-stone-900 sm:text-transparent sm:bg-clip-text sm:bg-gradient-to-r from-brand-stone-900 via-indigo-950 to-brand-stone-900 tracking-tight mb-8"
               >
                 মোঃ রাশিদুল হক
               </motion.h2>
@@ -582,7 +596,7 @@ export default function App() {
                 transition={{ duration: 2.0, ease: [0.22, 1, 0.36, 1] }}
                 className="overflow-hidden"
               >
-                <h1 className="text-2xl sm:text-4xl lg:text-6xl font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-stone-900 via-indigo-950 to-brand-stone-900 tracking-tighter leading-[1.1] mb-2">
+                <h1 className="text-2xl sm:text-4xl lg:text-6xl font-display font-extrabold text-brand-stone-900 sm:text-transparent sm:bg-clip-text sm:bg-gradient-to-r from-brand-stone-900 via-indigo-950 to-brand-stone-900 tracking-tighter leading-[1.1] mb-2">
                   মোঃ রাশিদুল হক
                 </h1>
               </motion.div>
