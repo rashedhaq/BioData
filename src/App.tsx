@@ -173,13 +173,55 @@ function PopupInfo({ label, icon, color, content }: {
     <div className="relative">
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        whileHover={{ y: -2, backgroundColor: "rgba(255, 255, 255, 0.7)" }}
-        className={`w-full flex items-center gap-3 bg-white/40 backdrop-blur-md p-4 rounded-2xl border border-white/60 shadow-sm transition-all group ${theme.glow}`}
+        variants={{
+          hidden: { 
+            opacity: 0, 
+            scale: 0.9, 
+            filter: 'blur(10px)',
+            y: 20 
+          },
+          show: { 
+            opacity: 1, 
+            scale: 1, 
+            filter: 'blur(0px)',
+            y: 0,
+            transition: { 
+              duration: 1.2, 
+              ease: [0.22, 1, 0.36, 1] 
+            }
+          }
+        }}
+        whileHover={{ 
+          scale: 1.02, 
+          y: -4, 
+          backgroundColor: "rgba(255, 255, 255, 0.75)",
+          transition: { duration: 0.3 }
+        }}
+        className={`w-full flex items-center gap-3 bg-white/40 backdrop-blur-md p-4 rounded-2xl border border-white/60 shadow-sm transition-all group ${theme.glow} relative overflow-hidden`}
       >
-        <div className={`w-8 h-8 rounded-lg ${theme.bg} ${theme.text} flex items-center justify-center transition-all ${theme.hBg} group-hover:text-white group-hover:scale-110 shadow-sm border ${theme.border}`}>
+        {/* Animated Shine Effect */}
+        <div className="absolute inset-0 z-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+          <motion.div 
+            className="absolute inset-0"
+            animate={{ 
+              x: ['-200%', '200%'],
+            }}
+            transition={{ 
+              duration: 3, 
+              repeat: Infinity, 
+              ease: "linear" 
+            }}
+            style={{
+              background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+              transform: 'skewX(-20deg)'
+            }}
+          />
+        </div>
+
+        <div className={`w-8 h-8 rounded-lg ${theme.bg} ${theme.text} flex items-center justify-center transition-all ${theme.hBg} group-hover:text-white group-hover:scale-110 shadow-sm border ${theme.border} relative z-10`}>
           {icon}
         </div>
-        <div className="flex flex-col items-start">
+        <div className="flex flex-col items-start relative z-10">
           <span className="text-[9px] uppercase tracking-[0.2em] text-brand-stone-400 font-display font-black leading-none mb-1">{label}</span>
           <span className="text-[12px] font-bold text-brand-stone-900 font-sans tracking-tight">বিস্তারিত দেখুন</span>
         </div>
@@ -486,10 +528,10 @@ export default function App() {
               className="text-center"
             >
               <motion.h2 
-                initial={{ opacity: 0, y: 10 }}
+                initial={{ opacity: 0, y: 5 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1.2, ease: "easeOut" }}
-                className="text-2xl sm:text-4xl lg:text-5xl font-display font-extrabold text-brand-stone-900 sm:text-transparent sm:bg-clip-text sm:bg-gradient-to-r from-brand-stone-900 via-indigo-950 to-brand-stone-900 tracking-tight mb-8"
+                transition={{ duration: 0.8, ease: "easeOut" }}
+                className="text-2xl sm:text-4xl lg:text-5xl font-display font-extrabold text-brand-stone-900 sm:text-transparent sm:bg-clip-text sm:bg-gradient-to-r from-brand-stone-900 via-indigo-950 to-brand-stone-900 mb-8"
               >
                 মোঃ রাশিদুল হক
               </motion.h2>
@@ -592,24 +634,24 @@ export default function App() {
               <motion.div
                 initial={{ opacity: 0, x: -100 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ margin: "-100px", once: false }}
-                transition={{ duration: 2.0, ease: [0.22, 1, 0.36, 1] }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
                 className="overflow-hidden"
               >
-                <h1 className="text-2xl sm:text-4xl lg:text-6xl font-display font-extrabold text-brand-stone-900 sm:text-transparent sm:bg-clip-text sm:bg-gradient-to-r from-brand-stone-900 via-indigo-950 to-brand-stone-900 tracking-tighter leading-[1.1] mb-2">
+                <h1 className="text-2xl sm:text-4xl lg:text-6xl font-display font-extrabold text-brand-stone-900 sm:text-transparent sm:bg-clip-text sm:bg-gradient-to-r from-brand-stone-900 via-indigo-950 to-brand-stone-900 leading-[1.1] mb-2">
                   মোঃ রাশিদুল হক
                 </h1>
               </motion.div>
               
               <motion.div
-                initial={{ opacity: 0, x: 100 }}
+                initial={{ opacity: 0, x: 50 }}
                 whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ margin: "-100px", once: false }}
-                transition={{ duration: 2.0, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                viewport={{ once: true }}
+                transition={{ duration: 1.2, delay: 0.3, ease: [0.22, 1, 0.36, 1] }}
                 className="flex items-center gap-4"
               >
-                <div className="h-px w-12 bg-brand-gold"></div>
-                <p className="text-brand-stone-500 font-display font-bold text-base sm:text-xl lg:text-2xl tracking-tight">
+                <div className="h-px w-8 sm:w-12 bg-brand-gold"></div>
+                <p className="text-brand-stone-700 sm:text-brand-stone-500 font-display font-bold text-sm sm:text-xl lg:text-2xl">
                   মিরপুর ১, ঢাকা-১২১৬
                 </p>
               </motion.div>
@@ -748,15 +790,54 @@ export default function App() {
                 viewport={{ once: true }}
               >
                 <Section title="জীবন দর্শন" compact direction="left">
-                  <motion.p 
-                    variants={{
-                      hidden: { opacity: 0, x: -10 },
-                      show: { opacity: 1, x: 0 }
-                    }}
-                    className="text-sm text-brand-stone-600 leading-relaxed font-sans italic"
+                  <motion.div
+                    className="relative overflow-hidden group/philosophy"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   >
-                    "আল্লাহ প্রদত্ত রাসূল (সাঃ) প্রদর্শিত বিধান অনুযায়ী মানুষের সার্বিক জীবনের পুনর্বিন্যাস সাধন করে আল্লাহর সন্তুষ্টি অর্জন"
-                  </motion.p>
+                    {/* Animated Shine Effect */}
+                    <motion.div 
+                      className="absolute inset-0 z-0 pointer-events-none"
+                      animate={{ 
+                        x: ['-200%', '200%'],
+                        opacity: [0, 1, 0]
+                      }}
+                      transition={{ 
+                        duration: 3, 
+                        repeat: Infinity, 
+                        repeatDelay: 5,
+                        ease: "linear" 
+                      }}
+                      style={{
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+                        transform: 'skewX(-20deg)'
+                      }}
+                    />
+
+                    <motion.p 
+                      variants={{
+                        hidden: { opacity: 0, scale: 0.9, filter: 'blur(8px)', y: 20 },
+                        show: { 
+                          opacity: 1, 
+                          scale: 1, 
+                          filter: 'blur(0px)', 
+                          y: 0,
+                          transition: { 
+                            duration: 1.5, 
+                            ease: [0.22, 1, 0.36, 1] 
+                          }
+                        }
+                      }}
+                      className="text-sm text-brand-stone-600 leading-relaxed font-sans italic relative z-10"
+                    >
+                      "আল্লাহ প্রদত্ত রাসূল (সাঃ) প্রদর্শিত বিধান অনুযায়ী মানুষের সার্বিক জীবনের পুনর্বিন্যাস সাধন করে আল্লাহর সন্তুষ্টি অর্জন"
+                    </motion.p>
+                    
+                    {/* Background glow on hover */}
+                    <motion.div 
+                      className="absolute -inset-4 bg-gradient-to-br from-emerald-500/10 via-transparent to-indigo-500/10 blur-2xl -z-10 opacity-0 group-hover/philosophy:opacity-100 transition-opacity duration-1000"
+                    />
+                  </motion.div>
                 </Section>
               </motion.div>
           </motion.aside>
@@ -926,10 +1007,52 @@ export default function App() {
                 ].map((member, idx) => (
                   <motion.div 
                     key={idx}
-                    whileHover={{ y: -2, backgroundColor: "rgba(255, 255, 255, 0.7)" }}
-                    className={`bg-white/40 backdrop-blur-md p-5 rounded-2xl border border-white/60 shadow-sm transition-all group ${idx === 2 ? 'sm:col-span-2' : ''} ${member.glow}`}
+                    variants={{
+                      hidden: { 
+                        opacity: 0, 
+                        scale: 0.9, 
+                        filter: 'blur(10px)',
+                        y: 30 
+                      },
+                      show: { 
+                        opacity: 1, 
+                        scale: 1, 
+                        filter: 'blur(0px)',
+                        y: 0,
+                        transition: { 
+                          duration: 1.2, 
+                          ease: [0.22, 1, 0.36, 1] 
+                        }
+                      }
+                    }}
+                    whileHover={{ 
+                      scale: 1.02, 
+                      y: -4, 
+                      backgroundColor: "rgba(255, 255, 255, 0.75)",
+                      transition: { duration: 0.3 }
+                    }}
+                    className={`bg-white/40 backdrop-blur-md p-5 rounded-2xl border border-white/60 shadow-sm transition-all group ${idx === 2 ? 'sm:col-span-2' : ''} ${member.glow} relative overflow-hidden`}
                   >
-                    <div className="flex items-start gap-4">
+                    {/* Animated Shine Effect */}
+                    <div className="absolute inset-0 z-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                      <motion.div 
+                        className="absolute inset-0"
+                        animate={{ 
+                          x: ['-200%', '200%'],
+                        }}
+                        transition={{ 
+                          duration: 3, 
+                          repeat: Infinity, 
+                          ease: "linear" 
+                        }}
+                        style={{
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent)',
+                          transform: 'skewX(-20deg)'
+                        }}
+                      />
+                    </div>
+
+                    <div className="flex items-start gap-4 relative z-10">
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all group-hover:text-white group-hover:scale-110 shadow-sm border ${member.iconClass}`}>
                         {member.icon}
                       </div>
@@ -1274,14 +1397,39 @@ function CardItem({ children }: { children: React.ReactNode; key?: React.Key }) 
   return (
     <motion.div 
       variants={{
-        hidden: { opacity: 0, x: -10 },
-        show: { opacity: 1, x: 0 }
+        hidden: { 
+          opacity: 0, 
+          scale: 0.95, 
+          filter: 'blur(10px)',
+          y: 20 
+        },
+        show: { 
+          opacity: 1, 
+          scale: 1, 
+          filter: 'blur(0px)',
+          y: 0,
+          transition: { 
+            duration: 1.2, 
+            ease: [0.22, 1, 0.36, 1] 
+          }
+        }
       }}
-      whileHover={{ scale: 1.01, x: 4 }}
-      transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="p-4 -m-4 rounded-2xl hover:bg-white/40 transition-all duration-300 border border-transparent hover:border-brand-gold/10 group glass-card"
+      whileHover={{ 
+        scale: 1.02, 
+        x: 8,
+        backgroundColor: "rgba(255, 255, 255, 0.6)",
+        transition: { duration: 0.3 }
+      }}
+      className="p-5 -m-5 rounded-2xl transition-all duration-500 border border-transparent hover:border-brand-gold/20 group glass-card relative overflow-hidden"
     >
-      {children}
+      {/* Subtle shine effect on hover */}
+      <motion.div 
+        className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-in-out"
+        style={{ skewX: '-20deg' }}
+      />
+      <div className="relative z-10">
+        {children}
+      </div>
     </motion.div>
   );
 }
