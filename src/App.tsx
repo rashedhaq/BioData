@@ -20,6 +20,9 @@ import {
   Phone,
   Mail,
   Home,
+  Globe,
+  Star,
+  Activity,
   Facebook,
   Instagram,
   Linkedin,
@@ -33,6 +36,10 @@ import { motion, AnimatePresence } from 'motion/react';
 
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
+// @ts-ignore
+import html2pdf from 'html2pdf.js';
+// @ts-ignore
+import domtoimage from 'dom-to-image-more';
 
 declare global {
   interface Window {
@@ -134,6 +141,91 @@ const getGoogleDriveLink = (url: string | null) => {
   return url;
 };
 
+function PopupInfo({ label, icon, color, content }: { 
+  label: string; 
+  icon: React.ReactNode; 
+  color: string;
+  content: { name: string; info: string }[];
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  // Dynamic color mapping
+  const colorMap: Record<string, { bg: string, text: string, border: string, hBg: string, glow: string }> = {
+    sky: { 
+      bg: "bg-sky-50", 
+      text: "text-sky-600", 
+      border: "border-sky-100/50", 
+      hBg: "group-hover:bg-sky-500",
+      glow: "hover:shadow-[0_10px_30px_-10px_rgba(14,165,233,0.3)]"
+    },
+    emerald: { 
+      bg: "bg-emerald-50", 
+      text: "text-emerald-600", 
+      border: "border-emerald-100/50", 
+      hBg: "group-hover:bg-emerald-500",
+      glow: "hover:shadow-[0_10px_30px_-10px_rgba(16,185,129,0.3)]"
+    }
+  };
+
+  const theme = colorMap[color] || colorMap.sky;
+
+  return (
+    <div className="relative">
+      <motion.button
+        onClick={() => setIsOpen(!isOpen)}
+        whileHover={{ y: -2, backgroundColor: "rgba(255, 255, 255, 0.7)" }}
+        className={`w-full flex items-center gap-3 bg-white/40 backdrop-blur-md p-4 rounded-2xl border border-white/60 shadow-sm transition-all group ${theme.glow}`}
+      >
+        <div className={`w-8 h-8 rounded-lg ${theme.bg} ${theme.text} flex items-center justify-center transition-all ${theme.hBg} group-hover:text-white group-hover:scale-110 shadow-sm border ${theme.border}`}>
+          {icon}
+        </div>
+        <div className="flex flex-col items-start">
+          <span className="text-[9px] uppercase tracking-[0.2em] text-brand-stone-400 font-display font-black leading-none mb-1">{label}</span>
+          <span className="text-[12px] font-bold text-brand-stone-900 font-sans tracking-tight">বিস্তারিত দেখুন</span>
+        </div>
+      </motion.button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 z-40 bg-black/5 backdrop-blur-[2px] no-print"
+            />
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="absolute bottom-full left-0 mb-3 w-64 z-50 no-print"
+            >
+              <div className="bg-white/95 backdrop-blur-xl border border-white/80 rounded-2xl shadow-2xl overflow-hidden p-4 space-y-3">
+                <div className="flex justify-between items-center pb-2 border-b border-brand-stone-100">
+                  <h4 className="font-display font-black text-[9px] uppercase tracking-widest text-brand-stone-500">{label} এর তথ্য</h4>
+                  <button onClick={() => setIsOpen(false)} className="text-brand-stone-400 hover:text-brand-stone-900 transition-colors">
+                    <X size={14} />
+                  </button>
+                </div>
+                <div className="space-y-3 max-h-[40vh] overflow-y-auto pr-1 custom-scrollbar">
+                  {content.map((item, i) => (
+                    <div key={i} className="flex flex-col gap-0.5 p-2 rounded-lg bg-black/5 border border-black/5">
+                      <span className="text-[13px] font-bold text-brand-stone-900 font-sans">{item.name}</span>
+                      <span className="text-[11px] text-brand-stone-500 font-medium italic">{item.info}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div className="absolute top-full left-6 w-3 h-3 bg-white/95 transform rotate-45 -translate-y-1.5 border-r border-b border-white/80 shadow-lg"></div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export default function App() {
   const [profilePhoto, setProfilePhoto] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<Photo | null>(null);
@@ -195,174 +287,162 @@ export default function App() {
     setIsDownloading(true);
     
     try {
-      // Ensure we are at the top and layout is settled
       window.scrollTo(0, 0);
       await new Promise(resolve => setTimeout(resolve, 800));
 
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-        windowWidth: 1024,
-        scrollX: 0,
-        scrollY: 0,
-        onclone: (clonedDoc) => {
-          const printable = clonedDoc.getElementById('printable-content');
-          if (!printable) return;
+      const opt = {
+        margin: [10, 10, 10, 10],
+        filename: 'Md-Rashidul-Haq-CV.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true, 
+          letterRendering: true,
+          windowWidth: 1200,
+          // NUCLEAR FIX: Ignore all existing styles to prevent oklch/oklab parser crash in Tailwind v4
+          ignoreElements: (el: Element) => {
+            const tag = el.tagName.toLowerCase();
+            return tag === 'style' || tag === 'link';
+          },
+          onclone: (clonedDoc: Document) => {
+            // Remove motion and interactive interference from the clone
+            const allElements = clonedDoc.querySelectorAll('*');
+            allElements.forEach(el => {
+              const node = el as HTMLElement;
+              node.style.setProperty('transform', 'none', 'important');
+              node.style.setProperty('transition', 'none', 'important');
+              node.style.setProperty('animation', 'none', 'important');
+              node.style.setProperty('opacity', '1', 'important');
+              node.style.setProperty('visibility', 'visible', 'important');
+              
+              const inline = node.getAttribute('style');
+              if (inline && (inline.includes('oklch') || inline.includes('oklab'))) {
+                node.setAttribute('style', inline.replace(/oklch\([^)]+\)/g, '#1e293b').replace(/oklab\([^)]+\)/g, '#1e293b'));
+              }
+            });
 
-          // Remove no-print elements
-          const noPrint = clonedDoc.querySelectorAll('.no-print');
-          noPrint.forEach(el => (el as HTMLElement).style.setProperty('display', 'none', 'important'));
+            // Inject a safe, high-quality PDF stylesheet
+            const style = clonedDoc.createElement('style');
+            style.innerHTML = `
+              @import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700&display=swap');
+              
+              * {
+                box-sizing: border-box !important;
+                font-family: 'Hind Siliguri', sans-serif !important;
+                color: #1e293b !important;
+              }
+              
+              body { background: white !important; margin: 0 !important; padding: 0 !important; }
+              
+              #printable-content { 
+                background: white !important; 
+                padding: 40px !important; 
+                width: 100% !important;
+                max-width: 1000px !important;
+                margin: 0 auto !important;
+              }
 
-          // Force standard PDF layout - Stabilized for A4
-          printable.style.setProperty('padding', '25mm', 'important');
-          printable.style.setProperty('width', '1000px', 'important');
-          printable.style.setProperty('max-width', '1000px', 'important');
-          printable.style.setProperty('margin', '0 auto', 'important');
-          printable.style.setProperty('background-color', 'white', 'important');
-          printable.style.setProperty('border-radius', '0', 'important');
+              h1 { font-size: 48px !important; margin-bottom: 8px !important; font-weight: 700 !important; }
+              h3 { 
+                font-size: 26px !important; 
+                font-weight: 700 !important; 
+                margin-top: 35px !important; 
+                display: block !important; 
+                border-bottom: 2px solid #1e293b !important; 
+                padding-bottom: 10px !important; 
+                margin-bottom: 20px !important; 
+              }
+              p { font-size: 14px !important; line-height: 1.6 !important; }
 
-          // Critical: Fix for modern CSS colors (oklch/oklab) and layout cleanup
-          const all = printable.querySelectorAll('*');
-          all.forEach(el => {
-            const node = el as HTMLElement;
-            const style = window.getComputedStyle(node);
-            
-            // Force reveal everything
-            node.style.setProperty('opacity', '1', 'important');
-            node.style.setProperty('visibility', 'visible', 'important');
-            node.style.setProperty('transform', 'none', 'important');
-            node.style.setProperty('animation', 'none', 'important');
-            node.style.setProperty('transition', 'none', 'important');
-            node.style.setProperty('box-shadow', 'none', 'important');
-            node.style.setProperty('text-shadow', 'none', 'important');
+              .glass-card { 
+                background: white !important; 
+                border: 1px solid #e2e8f0 !important; 
+                border-radius: 12px !important;
+                padding: 24px !important;
+                margin-bottom: 20px !important;
+                display: block !important;
+                page-break-inside: avoid !important;
+                box-shadow: none !important;
+              }
 
-            // Responsive Layout Fix: Forces vertical stacking for the PDF
-            if (style.display === 'grid' || style.display === 'flex') {
-               // Only force block if it's a structural container or has multiple columns
-               if (node.classList.contains('grid-cols-2') || 
-                   node.classList.contains('grid-cols-4') || 
-                   node.classList.contains('md:grid-cols-2') ||
-                   node.tagName === 'MAIN') {
-                 node.style.setProperty('display', 'block', 'important');
-               }
-            }
-            
-            // Clean up card appearances
-            if (node.classList.contains('glass-card')) {
-              node.style.setProperty('background', '#ffffff', 'important');
-              node.style.setProperty('border', '1px solid #e2e8f0', 'important');
-              node.style.setProperty('backdrop-filter', 'none', 'important');
-              node.style.setProperty('margin-bottom', '20px', 'important');
-              node.style.setProperty('padding', '25px', 'important');
-            }
-          });
+              /* Hide decorative elements */
+              .h-\\[2px\\], svg, .w-6, .h-6, .w-10, .h-10, .w-9, .h-9, [class*="lucide"] { display: none !important; }
+              
+              /* Layout: Multi-column support for PDF */
+              .grid { display: block !important; }
+              
+              /* Force Personal Info & Family Info into 2 columns on A4 */
+              .md\\:grid-cols-2, [class*="grid-cols-2"] {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 0 !important;
+                width: 100% !important;
+              }
+              
+              .md\\:grid-cols-2 > div, [class*="grid-cols-2"] > div {
+                width: 50% !important;
+                padding-right: 15px !important;
+              }
 
-          // Style injection for a premium PDF look
-          const styleSheet = clonedDoc.createElement('style');
-          styleSheet.innerHTML = `
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-            
-            * { 
-              font-family: 'Inter', system-ui, sans-serif !important; 
-              -webkit-print-color-adjust: exact !important;
-              color-adjust: exact !important;
-            }
-            
-            header {
-              border-bottom: 6px solid #1c1917 !important;
-              margin-bottom: 50px !important;
-              padding-bottom: 30px !important;
-              display: block !important;
-              width: 100% !important;
-            }
+              /* Personal Info entries */
+              .justify-between {
+                display: flex !important;
+                justify-content: space-between !important;
+                align-items: center !important;
+                border-bottom: 1px solid #f1f5f9 !important;
+                padding: 10px 0 !important;
+                width: 100% !important;
+              }
+              
+              .tracking-\[0\\.15em\] { font-size: 12px !important; font-weight: 600 !important; text-transform: none !important; color: #64748b !important; letter-spacing: 0 !important; }
+              .text-\[14px\] { font-size: 14px !important; font-weight: 700 !important; }
 
-            h1 { 
-              font-size: 36pt !important; 
-              font-weight: 800 !important; 
-              color: #1c1917 !important; 
-              margin: 0 0 10px 0 !important;
-              letter-spacing: -0.03em !important;
-            }
+              /* Education Section cleanup */
+              .flex.items-center.gap-2.mb-1 { display: flex !important; align-items: center !important; margin-bottom: 5px !important; }
+              .text-lg.sm\\:text-xl { font-size: 20px !important; font-weight: 700 !important; }
+              .text-\\[10px\\]\\.sm\\:text-\\[11px\\] { font-size: 13px !important; color: #475569 !important; margin-top: 4px !important; }
+              .text-brand-stone-600.mt-1 { font-size: 14px !important; color: #334155 !important; border-top: 1px dashed #e2e8f0 !important; padding-top: 5px !important; margin-top: 8px !important; }
 
-            h3 { 
-              font-size: 18pt !important; 
-              font-weight: 800 !important; 
-              color: #1e293b !important;
-              text-transform: uppercase !important;
-              letter-spacing: 0.05em !important;
-              border-bottom: 2px solid #1e293b !important;
-              padding-bottom: 12px !important;
-              margin: 40px 0 25px 0 !important;
-              display: block !important;
-              width: 100% !important;
-            }
+              /* Cleanup background containers */
+              .bg-white\\/20, .backdrop-blur-md, .rounded-2xl { 
+                background: transparent !important; 
+                border: none !important; 
+                box-shadow: none !important; 
+              }
+              
+              .bg-brand-stone-100 { 
+                background: #f1f5f9 !important; 
+                padding: 2px 10px !important; 
+                border-radius: 6px !important; 
+                font-size: 13px !important; 
+                color: #475569 !important;
+                margin-left: 10px !important;
+              }
 
-            section { 
-              margin-bottom: 60px !important; 
-              page-break-inside: avoid !important; 
-              display: block !important;
-              width: 100% !important;
-              padding-bottom: 20px !important;
-            }
+              /* Hide UI/Interactive */
+              button, .no-print, #download-buttons, #print-cv-btn, .bg-blobs, #particles-js, .fixed, [role="button"] { 
+                display: none !important; 
+              }
 
-            .glass-card { 
-               display: block !important;
-               width: 100% !important;
-               page-break-inside: avoid !important;
-               margin-bottom: 35px !important;
-               background: #ffffff !important;
-               border: 1px solid #f1f5f9 !important;
-               padding: 30px !important;
-            }
+              footer {
+                margin-top: 60px !important;
+                border-top: 1px solid #e2e8f0 !important;
+                padding-top: 20px !important;
+                display: flex !important;
+                justify-content: space-between !important;
+                color: #64748b !important;
+                font-size: 14px !important;
+              }
+            `;
+            clonedDoc.head.appendChild(style);
+          }
+        },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
 
-            p, span, div { 
-              color: #334155 !important; 
-              font-size: 12pt !important;
-              line-height: 1.7 !important;
-            }
+      // @ts-ignore
+      html2pdf().from(element).set(opt).save();
 
-            .text-brand-stone-900 { color: #0f172a !important; font-weight: 700 !important; }
-            .text-brand-stone-600 { color: #475569 !important; }
-          `;
-          clonedDoc.head.appendChild(styleSheet);
-        }
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 1.0);
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = canvas.width;
-      const imgHeight = canvas.height;
-      
-      const imgPageHeight = (imgHeight * pdfWidth) / imgWidth;
-      const topMargin = 20; // 20mm top margin for pages after the first
-      const effectivePageHeight = pdfHeight - topMargin;
-      
-      // Add the first page (no top margin needed for the very first page as it has header padding)
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, imgPageHeight);
-      
-      let heightLeft = imgPageHeight - pdfHeight;
-      let position = -pdfHeight;
-
-      // Add remaining pages with a top margin
-      while (heightLeft > 0) {
-        pdf.addPage();
-        // Shift position down by topMargin and draw
-        pdf.addImage(imgData, 'JPEG', 0, position + topMargin, pdfWidth, imgPageHeight);
-        
-        // Overlay a white rectangle at the top to create a clean margin
-        pdf.setFillColor(255, 255, 255);
-        pdf.rect(0, 0, pdfWidth, topMargin, 'F');
-
-        heightLeft -= effectivePageHeight;
-        position -= effectivePageHeight;
-      }
-
-      pdf.save(`Md-Rashidul-Haq-CV.pdf`);
     } catch (error) {
       console.error('PDF generation error:', error);
       window.print();
@@ -395,7 +475,7 @@ export default function App() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 1.2, ease: "easeOut" }}
-                className="text-4xl sm:text-6xl lg:text-7xl font-display font-extrabold text-brand-stone-900 tracking-tight mb-8"
+                className="text-2xl sm:text-4xl lg:text-5xl font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-stone-900 via-indigo-950 to-brand-stone-900 tracking-tight mb-8"
               >
                 মোঃ রাশিদুল হক
               </motion.h2>
@@ -499,10 +579,10 @@ export default function App() {
                 initial={{ opacity: 0, x: -100 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ margin: "-100px", once: false }}
-                transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 2.0, ease: [0.22, 1, 0.36, 1] }}
                 className="overflow-hidden"
               >
-                <h1 className="text-5xl sm:text-7xl lg:text-9xl font-display font-extrabold text-brand-stone-900 tracking-tighter leading-[0.85] mb-2">
+                <h1 className="text-2xl sm:text-4xl lg:text-6xl font-display font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-brand-stone-900 via-indigo-950 to-brand-stone-900 tracking-tighter leading-[1.1] mb-2">
                   মোঃ রাশিদুল হক
                 </h1>
               </motion.div>
@@ -511,41 +591,80 @@ export default function App() {
                 initial={{ opacity: 0, x: 100 }}
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ margin: "-100px", once: false }}
-                transition={{ duration: 1.5, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 2.0, delay: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className="flex items-center gap-4"
               >
                 <div className="h-px w-12 bg-brand-gold"></div>
-                <p className="text-brand-stone-500 font-display font-bold text-xl sm:text-3xl tracking-tight">
+                <p className="text-brand-stone-500 font-display font-bold text-base sm:text-xl lg:text-2xl tracking-tight">
                   মিরপুর ১, ঢাকা-১২১৬
                 </p>
               </motion.div>
             </div>
             
             <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.8 }}
-              className="flex flex-wrap gap-3 sm:gap-4 text-[12px] sm:text-[13px] font-bold text-brand-stone-700 no-print items-center"
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.15,
+                    delayChildren: 0.8
+                  }
+                }
+              }}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: false }}
+              className="flex flex-col sm:flex-row flex-wrap gap-2.5 sm:gap-2 text-[11px] font-bold text-brand-stone-700 no-print items-start sm:items-center w-full sm:w-auto"
             >
              <motion.div 
-               whileHover={{ scale: 1.05 }}
-               className="relative group overflow-hidden bg-brand-stone-900 text-brand-cream px-6 py-3 rounded-2xl shadow-xl uppercase tracking-[0.25em] text-[10px] font-black font-display"
+               variants={{
+                 hidden: { opacity: 0, y: 10, scale: 0.95 },
+                 show: { opacity: 1, y: 0, scale: 1 }
+               }}
+               whileHover={{ scale: 1.05, y: -1 }}
+               className="relative group overflow-hidden bg-gradient-to-br from-violet-950 via-indigo-950 to-emerald-950 text-white px-3.5 py-2 sm:px-3 sm:py-1.5 rounded-lg shadow-[0_8px_15px_-4px_rgba(0,0,0,0.4)] uppercase tracking-[0.2em] text-[8px] sm:text-[7.5px] font-black font-display border border-white/5"
              >
-               <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:left-full transition-all duration-1000"></div>
-               IT Professional
+               <div className="absolute top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent group-hover:left-full transition-all duration-1000"></div>
+               <span className="relative z-10 flex items-center gap-1.5">
+                 <div className="w-1 h-1 rounded-full bg-emerald-400 animate-pulse"></div>
+                 IT Professional
+               </span>
              </motion.div>
-             <div className="flex items-center gap-4 bg-white/40 backdrop-blur-md px-6 py-3 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.02)] border border-white/60 transition-all hover:bg-white/80 group">
-                <div className="p-2 bg-brand-stone-50 rounded-xl group-hover:bg-brand-gold/10 transition-colors">
-                  <Phone size={14} className="text-brand-stone-500 group-hover:text-brand-gold" />
+
+             <motion.div 
+                variants={{
+                  hidden: { opacity: 0, y: 10, scale: 0.95 },
+                  show: { opacity: 1, y: 0, scale: 1 }
+                }}
+                whileHover={{ y: -2, scale: 1.02, boxShadow: "0 10px 30px -5px rgba(16, 185, 129, 0.3)" }}
+                className="flex items-center gap-2.5 sm:gap-2 bg-emerald-400/10 backdrop-blur-2xl px-3 py-2 sm:px-2.5 sm:py-1.5 rounded-lg border border-emerald-300/30 transition-all hover:bg-emerald-400/20 group cursor-pointer w-full sm:w-auto shadow-sm"
+             >
+                <div className="p-1.5 sm:p-1 bg-emerald-500/20 rounded-md group-hover:bg-emerald-500 group-hover:text-white transition-all duration-500 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
+                  <Phone size={12} className="text-emerald-600 group-hover:text-white transition-colors" />
                 </div>
-                <span className="font-sans font-black text-brand-stone-900 leading-none tracking-tight">01912196464</span>
-             </div>
-             <div className="flex items-center gap-4 bg-white/40 backdrop-blur-md px-6 py-3 rounded-2xl shadow-[0_8px_32px_rgba(0,0,0,0.02)] border border-white/60 transition-all hover:bg-white/80 group lowercase">
-                <div className="p-2 bg-brand-stone-50 rounded-xl group-hover:bg-brand-gold/10 transition-colors">
-                  <Mail size={14} className="text-brand-stone-500 group-hover:text-brand-gold" />
+                <div className="flex flex-col">
+                  <span className="text-[6.5px] sm:text-[6px] uppercase tracking-widest text-emerald-600/70 font-display font-black leading-none mb-0.5 whitespace-nowrap">যোগাযোগ</span>
+                  <span className="font-sans font-black text-brand-stone-900 text-[12px] sm:text-[10px] leading-none tracking-tight">01912196464</span>
                 </div>
-                <span className="font-sans font-black text-brand-stone-900 leading-none tracking-tighter">rashidulhaq015@gmail.com</span>
-             </div>
+             </motion.div>
+
+             <motion.div 
+                variants={{
+                  hidden: { opacity: 0, y: 10, scale: 0.95 },
+                  show: { opacity: 1, y: 0, scale: 1 }
+                }}
+                whileHover={{ y: -2, scale: 1.02, boxShadow: "0 10px 30px -5px rgba(16, 185, 129, 0.2)" }}
+                className="flex items-center gap-2.5 sm:gap-2 bg-emerald-400/10 backdrop-blur-2xl px-3 py-2 sm:px-2.5 sm:py-1.5 rounded-lg border border-emerald-300/30 transition-all hover:bg-emerald-400/20 group cursor-pointer lowercase w-full sm:w-auto shadow-sm"
+             >
+                <div className="p-1.5 sm:p-1 bg-emerald-500/20 rounded-md group-hover:bg-emerald-500 group-hover:text-white transition-all duration-500 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4)]">
+                  <Mail size={12} className="text-emerald-600 group-hover:text-white transition-colors" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[6.5px] sm:text-[6px] uppercase tracking-widest text-emerald-600/70 font-display font-black leading-none mb-0.5 whitespace-nowrap">ইমেইল</span>
+                  <span className="font-sans font-black text-brand-stone-900 text-[12px] sm:text-[10px] leading-none tracking-tighter">rashidulhaq015@gmail.com</span>
+                </div>
+             </motion.div>
             </motion.div>
           </header>
 
@@ -555,7 +674,7 @@ export default function App() {
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: false }}
-              transition={{ duration: 0.8, delay: 0.6 }}
+              transition={{ duration: 0.8, delay: 1.0 }}
               className="lg:col-span-3 flex flex-col gap-8"
             >
               {/* 
@@ -599,89 +718,159 @@ export default function App() {
               </motion.div>
               */}
 
-              <Section title="জীবন দর্শন" compact direction="down">
-              <p className="text-sm text-brand-stone-600 leading-relaxed font-sans italic">
-                "আল্লাহ প্রদত্ত রাসূল (সাঃ) প্রদর্শিত বিধান অনুযায়ী মানুষের সার্বিক জীবনের পুনর্বিন্যাস সাধন করে আল্লাহর সন্তুষ্টি অর্জন"
-              </p>
-            </Section>
+              <motion.div
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.15,
+                      delayChildren: 0.5
+                    }
+                  }
+                }}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+              >
+                <Section title="জীবন দর্শন" compact direction="left">
+                  <motion.p 
+                    variants={{
+                      hidden: { opacity: 0, x: -10 },
+                      show: { opacity: 1, x: 0 }
+                    }}
+                    className="text-sm text-brand-stone-600 leading-relaxed font-sans italic"
+                  >
+                    "আল্লাহ প্রদত্ত রাসূল (সাঃ) প্রদর্শিত বিধান অনুযায়ী মানুষের সার্বিক জীবনের পুনর্বিন্যাস সাধন করে আল্লাহর সন্তুষ্টি অর্জন"
+                  </motion.p>
+                </Section>
+              </motion.div>
           </motion.aside>
 
             {/* Center Column: Detailed Info */}
             <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: false }}
-              transition={{ duration: 0.8, delay: 0.8 }}
+              variants={{
+                hidden: { opacity: 0 },
+                show: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.25,
+                    delayChildren: 0.7
+                  }
+                }
+              }}
+              initial="hidden"
+              whileInView="show"
+              viewport={{ once: true }}
               className="lg:col-span-6 flex flex-col gap-8"
             >
-            <div className="flex flex-col gap-8">
-              <Section title="শিক্ষাগত যোগ্যতা" direction="up">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-                  <CardItem>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-display font-bold text-lg sm:text-xl text-brand-stone-900 leading-tight">বিএসসি ইঞ্জিনিয়ারিং</p>
-                      <span className="text-[10px] bg-brand-stone-100 text-brand-stone-500 px-2 py-0.5 rounded-full font-bold">২০১৯-২০২০</span>
+              <div className="flex flex-col gap-8">
+                <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+                  <Section title="শিক্ষাগত যোগ্যতা" direction="right">
+                    <motion.div 
+                      variants={{
+                        hidden: {},
+                        show: {
+                          transition: {
+                            staggerChildren: 0.3,
+                            delayChildren: 0.2
+                          }
+                        }
+                      }}
+                      className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10"
+                    >
+                    {[
+                      {
+                        title: "বিএসসি ইঞ্জিনিয়ারিং",
+                        year: "২০১৯-২০২০",
+                        subject: "কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিং",
+                        institution: "বাংলাদেশ ইউনিভার্সিটি অফ বিজনেস এন্ড টেকনোলজি (BUBT)",
+                        result: "রেজাল্টঃ সিজিপিএ ৩.৬৩"
+                      },
+                      {
+                        title: "কামিল মাস্টার্স",
+                        year: "২০২৩-২০২৪",
+                        subject: "তাফসীর বিভাগ",
+                        institution: "বেথুলিয়া বড়লাহোরিয়া কামিল মাদ্রাসা",
+                        result: "রেজাল্টঃ সিজিপিএ ৩.৮১ (১ম বর্ষ)"
+                      },
+                      {
+                        title: "ফাজিল অনার্স",
+                        year: "২০১৯-২০২০",
+                        subject: "",
+                        institution: "বেথুলিয়া বড়লাহোরিয়া কামিল মাদ্রাসা",
+                        result: "রেজাল্টঃ জিপিএ ৪.৫০"
+                      },
+                      {
+                        title: "আলিম",
+                        year: "২০১৯",
+                        subject: "বিজ্ঞান বিভাগ",
+                        institution: "হোগলাডাংগী এম আই কামিল মডেল মাদ্রাসা",
+                        result: "রেজাল্টঃ জিপিএ ৪.৫০"
+                      },
+                      {
+                        title: "দাখিল",
+                        year: "২০১৭",
+                        subject: "বিজ্ঞান বিভাগ",
+                        institution: "হোগলাডাংগী এম আই কামিল মডেল মাদ্রাসা",
+                        result: "রেজাল্টঃ জিপিএ ৫.০০"
+                      },
+                      {
+                        title: "জেডিসি",
+                        year: "২০১৪",
+                        subject: "",
+                        institution: "আফড়া আলিম মাদ্রাসা",
+                        result: "রেজাল্টঃ জিপিএ ৫.০০"
+                      }
+                    ].map((edu, idx) => (
+                      <CardItem key={`edu-${idx}`}>
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-display font-bold text-lg sm:text-xl text-brand-stone-900 leading-tight">{edu.title}</p>
+                          <span className="text-[10px] bg-brand-stone-100 text-brand-stone-500 px-2 py-0.5 rounded-full font-bold">{edu.year}</span>
+                        </div>
+                        {edu.subject && <p className="text-[10px] sm:text-[11px] text-brand-stone-700 font-bold font-display">{edu.subject}</p>}
+                        <p className="text-[10px] sm:text-[11px] text-brand-stone-700 uppercase tracking-widest font-black font-display">{edu.institution}</p>
+                        <p className="text-[12px] sm:text-sm text-brand-stone-600 mt-1 font-bold font-sans">{edu.result}</p>
+                      </CardItem>
+                    ))}
+                  </motion.div>
+                </Section>
+              </motion.div>
+              
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+                <Section title="ব্যক্তিগত তথ্য" direction="left">
+                <div className="bg-white/20 backdrop-blur-md rounded-2xl border border-white/40 overflow-hidden shadow-sm">
+                  {[
+                    { icon: <Calendar size={14} />, label: "জন্ম তারিখ", value: "১৯/০৭/২০০১" },
+                    { icon: <Globe size={14} />, label: "জাতীয়তা", value: "বাংলাদেশি" },
+                    { icon: <Star size={14} />, label: "ধর্ম", value: "ইসলাম" },
+                    { icon: <Activity size={14} />, label: "রক্তের গ্রুপ", value: "এবি+ (AB+)" },
+                    { icon: <Maximize2 size={14} />, label: "শারীরিক গঠন", value: "৫'৬'' | ৬৩ কেজি" },
+                    { icon: <User size={14} />, label: "গায়ের রঙ", value: "ফর্সা" }
+                  ].map((item, idx) => (
+                    <div 
+                      key={idx}
+                      className={`flex items-center justify-between px-5 py-3.5 ${idx !== 5 ? 'border-b border-white/10' : ''} hover:bg-white/30 transition-colors group`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-6 h-6 flex items-center justify-center text-brand-stone-500 group-hover:text-indigo-600 transition-colors">
+                          {item.icon}
+                        </div>
+                        <span className="text-[10px] uppercase tracking-[0.15em] text-brand-stone-600 font-display font-black leading-none">
+                          {item.label}
+                        </span>
+                      </div>
+                      <span className="text-[14px] font-bold text-brand-stone-900 font-sans tracking-tight">
+                        {item.value}
+                      </span>
                     </div>
-                    <p className="text-[10px] sm:text-[11px] text-brand-stone-700 font-bold font-display">কম্পিউটার সায়েন্স অ্যান্ড ইঞ্জিনিয়ারিং</p>
-                    <p className="text-[10px] sm:text-[11px] text-brand-stone-700 uppercase tracking-widest font-black font-display">বাংলাদেশ ইউনিভার্সিটি অফ বিজনেস এন্ড টেকনোলজি (BUBT)</p>
-                    <p className="text-[12px] sm:text-sm text-brand-stone-600 mt-1 font-bold font-sans">রেজাল্টঃ সিজিপিএ ৩.৬৩</p>
-                  </CardItem>
-                  <CardItem>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-display font-bold text-lg sm:text-xl text-brand-stone-900 leading-tight">কামিল মাস্টার্স</p>
-                      <span className="text-[10px] bg-brand-stone-100 text-brand-stone-500 px-2 py-0.5 rounded-full font-bold">২০২৩-২০২৪</span>
-                    </div>
-                    <p className="text-[10px] sm:text-[11px] text-brand-stone-700 uppercase tracking-widest font-black font-display">বেথুলিয়া বড়লাহোরিয়া কামিল মাদ্রাসা</p>
-                    <p className="text-[12px] sm:text-sm text-brand-stone-600 mt-1 font-bold font-sans">তাফসীর বিভাগ | রেজাল্টঃ সিজিপিএ ৩.৮১ (১ম বর্ষ)</p>
-                  </CardItem>
-                  <CardItem>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-display font-bold text-lg sm:text-xl text-brand-stone-900 leading-tight">ফাজিল অনার্স</p>
-                      <span className="text-[10px] bg-brand-stone-100 text-brand-stone-500 px-2 py-0.5 rounded-full font-bold">২০১৯-২০২০</span>
-                    </div>
-                    <p className="text-[10px] sm:text-[11px] text-brand-stone-700 uppercase tracking-widest font-black font-display">বেথুলিয়া বড়লাহোরিয়া কামিল মাদ্রাসা</p>
-                    <p className="text-[12px] sm:text-sm text-brand-stone-600 mt-1 font-bold font-sans">রেজাল্টঃ জিপিএ ৪.৫০</p>
-                  </CardItem>
-                  <CardItem>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-display font-bold text-lg sm:text-xl text-brand-stone-900 leading-tight">আলিম</p>
-                      <span className="text-[10px] bg-brand-stone-100 text-brand-stone-500 px-2 py-0.5 rounded-full font-bold">২০১৯</span>
-                    </div>
-                    <p className="text-[10px] sm:text-[11px] text-brand-stone-700 uppercase tracking-widest font-black font-display">হোগলাডাংগী এম আই কামিল মডেল মাদ্রাসা</p>
-                    <p className="text-[12px] sm:text-sm text-brand-stone-600 mt-1 font-bold font-sans">রেজাল্টঃ জিপিএ ৪.৫০ (বিজ্ঞান বিভাগ)</p>
-                  </CardItem>
-                  <CardItem>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-display font-bold text-lg sm:text-xl text-brand-stone-900 leading-tight">দাখিল</p>
-                      <span className="text-[10px] bg-brand-stone-100 text-brand-stone-500 px-2 py-0.5 rounded-full font-bold">২০১৭</span>
-                    </div>
-                    <p className="text-[10px] sm:text-[11px] text-brand-stone-700 uppercase tracking-widest font-black font-display">হোগলাডাংগী এম আই কামিল মডেল মাদ্রাসা</p>
-                    <p className="text-[12px] sm:text-sm text-brand-stone-600 mt-1 font-bold font-sans">রেজাল্টঃ জিপিএ ৫.০০ (বিজ্ঞান বিভাগ)</p>
-                  </CardItem>
-                  <CardItem>
-                    <div className="flex items-center gap-2 mb-1">
-                      <p className="font-display font-bold text-lg sm:text-xl text-brand-stone-900 leading-tight">জেডিসি</p>
-                      <span className="text-[10px] bg-brand-stone-100 text-brand-stone-500 px-2 py-0.5 rounded-full font-bold">২০১৪</span>
-                    </div>
-                    <p className="text-[10px] sm:text-[11px] text-brand-stone-700 uppercase tracking-widest font-black font-display">আফড়া আলিম মাদ্রাসা</p>
-                    <p className="text-[12px] sm:text-sm text-brand-stone-600 mt-1 font-bold font-sans">রেজাল্টঃ জিপিএ ৫.০০</p>
-                  </CardItem>
+                  ))}
                 </div>
               </Section>
+            </motion.div>
               
-              <Section title="ব্যক্তিগত তথ্য" direction="right">
-                <div className="space-y-1">
-                  <StatItem label="জন্ম তারিখ" value="১৯/০৭/২০০১" />
-                  <StatItem label="জাতীয়তা" value="বাংলাদেশি" />
-                  <StatItem label="ধর্ম" value="ইসলাম" />
-                  <StatItem label="রক্তের গ্রুপ" value="এবি+" />
-                  <StatItem label="উচ্চতা" value="৫'৬''" />
-                  <StatItem label="ওজন" value="৬৩ কেজি" />
-                  <StatItem label="গায়ের রঙ" value="ফর্সা" />
-                </div>
-              </Section>
-              
-              <Section title="পেশা" direction="down">
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+                <Section title="পেশা" direction="right">
                 <div className="space-y-1">
                   <p className="font-display font-bold text-2xl text-brand-stone-900 tracking-tight">সফটওয়্যার ইঞ্জিনিয়ার</p>
                   <p className="text-[10px] text-brand-stone-500 uppercase tracking-widest font-black font-display">প্রাইভেট আইটি কোম্পানি</p>
@@ -690,39 +879,86 @@ export default function App() {
                   </p>
                 </div>
               </Section>
-            </div>
+            </motion.div>
+              
+            <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+              <Section title="পারিবারিক তথ্য" direction="left">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {[
+                  { 
+                    icon: <User size={16} />, 
+                    label: "পিতা", 
+                    value: "মোঃ আরিফুল হক", 
+                    subtitle: "সুপার, কল্যাণপুর দাখিল মাদ্রাসা", 
+                    iconClass: "bg-indigo-50 text-indigo-600 border-indigo-100/50 group-hover:bg-indigo-500",
+                    glow: "group-hover:shadow-[0_0_20px_rgba(99,102,241,0.2)]"
+                  },
+                  { 
+                    icon: <Heart size={16} />, 
+                    label: "মাতা", 
+                    value: "তানিয়া আক্তার", 
+                    subtitle: "গৃহিণী", 
+                    iconClass: "bg-rose-50 text-rose-600 border-rose-100/50 group-hover:bg-rose-500",
+                    glow: "group-hover:shadow-[0_0_20px_rgba(244,63,94,0.2)]"
+                  },
+                  { 
+                    icon: <Users size={16} />, 
+                    label: "ভাই-বোন", 
+                    value: "নেই", 
+                    subtitle: "পিতা মাতার একমাত্র সন্তান", 
+                    iconClass: "bg-amber-50 text-amber-600 border-amber-100/50 group-hover:bg-amber-500",
+                    glow: "group-hover:shadow-[0_0_20px_rgba(245,158,11,0.2)]"
+                  }
+                ].map((member, idx) => (
+                  <motion.div 
+                    key={idx}
+                    whileHover={{ y: -2, backgroundColor: "rgba(255, 255, 255, 0.7)" }}
+                    className={`bg-white/40 backdrop-blur-md p-5 rounded-2xl border border-white/60 shadow-sm transition-all group ${idx === 2 ? 'sm:col-span-2' : ''} ${member.glow}`}
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all group-hover:text-white group-hover:scale-110 shadow-sm border ${member.iconClass}`}>
+                        {member.icon}
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[10px] uppercase tracking-[0.2em] text-brand-stone-400 font-display font-black leading-none mb-1.5">{member.label}</span>
+                        <h4 className="font-bold text-[16px] text-brand-stone-900 font-sans tracking-tight mb-0.5">{member.value}</h4>
+                        <p className="text-xs text-brand-stone-500 font-medium font-sans italic">{member.subtitle}</p>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
 
-            <Section title="পারিবারিক তথ্য" direction="left">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <CardItem>
-                    <p className="flex flex-col">
-                      <span className="text-brand-stone-600 uppercase tracking-widest font-black text-[10px] mb-1 font-display">পিতা</span>
-                      <span className="font-bold text-lg text-brand-stone-900 font-sans">মোঃ আরিফুল হক</span>
-                      <span className="text-sm text-brand-stone-600 font-bold">সুপার, কল্যাণপুর দাখিল মাদ্রাসা</span>
-                    </p>
-                  </CardItem>
-                  <CardItem>
-                    <p className="flex flex-col">
-                      <span className="text-brand-stone-600 uppercase tracking-widest font-black text-[10px] mb-1 font-display">মাতা</span>
-                      <span className="font-bold text-lg text-brand-stone-900 font-sans">তানিয়া আক্তার</span>
-                      <span className="text-sm text-brand-stone-600 font-bold">গৃহিণী</span>
-                    </p>
-                  </CardItem>
-                </div>
-                <div className="space-y-4 border-l border-brand-stone-300 pl-8">
-                  <CardItem>
-                    <p className="flex flex-col">
-                      <span className="text-brand-stone-600 uppercase tracking-widest font-black text-[10px] mb-1 font-display">ভাই-বোন</span>
-                      <span className="font-extrabold text-lg text-brand-stone-900 font-sans leading-tight">নেই</span>
-                      <span className="text-sm text-brand-stone-700 font-bold font-sans italic mt-1">পিতা মাতার একমাত্র সন্তান</span>
-                    </p>
-                  </CardItem>
+                {/* Additional Information Popover Buttons */}
+                <div className="sm:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                  <PopupInfo 
+                     label="চাচা" 
+                     icon={<Users size={16} />} 
+                     color="sky"
+                     content={[
+                       { name: "১. মোঃ আমিনুল হক", info: "এজিএম, প্রাইভেট কোম্পানি" },
+                       { name: "২. মোঃ আরিফুল হক", info: "পিতা" },
+                       { name: "৩. মোঃ আনোয়ারুল হক", info: "আরবি প্রভাষক" },
+                       { name: "৪. মোঃ আশরাফুল হক", info: "সিটি গ্রুপ" },
+                       { name: "৫. মোঃ আব্দুল হক", info: "মরহুম" }
+                     ]}
+                   />
+                  <PopupInfo 
+                    label="মামা" 
+                    icon={<Users size={16} />} 
+                    color="emerald"
+                    content={[
+                      { name: "মোট মামা", info: "৭ জন" },
+                      { name: "পেশা", info: "১ জন শিক্ষক এবং বাকি ৬ জন ব্যবসায়ী" }
+                    ]}
+                  />
                 </div>
               </div>
             </Section>
 
-            <Section title="ঠিকানা" direction="right">
+              </motion.div>
+
+              <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }}>
+                <Section title="ঠিকানা" direction="right">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                 <CardItem>
                   <p className="flex flex-col">
@@ -746,16 +982,18 @@ export default function App() {
               </p>
             </Section>
             */}
-            </motion.div>
-            <motion.aside 
+              </motion.div>
+            </div>
+          </motion.div>
+          <motion.aside 
               initial={{ opacity: 0, x: 20 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: false }}
-              transition={{ duration: 0.8, delay: 1 }}
+              transition={{ duration: 0.8, delay: 1.5 }}
               className="lg:col-span-3 flex flex-col gap-6 no-print"
             >
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-xs font-bold text-brand-stone-400 uppercase tracking-widest flex items-center gap-2 flex-1">
+              <h3 className="text-xs font-bold text-indigo-600/60 uppercase tracking-widest flex items-center gap-2 flex-1">
                 ছবি গ্যালারি <span className="h-px flex-1 bg-brand-stone-200"></span>
               </h3>
             </div>
@@ -767,7 +1005,7 @@ export default function App() {
                   initial={{ opacity: 0, scale: 0.8, y: 20 }}
                   whileInView={{ opacity: 1, scale: 1, y: 0 }}
                   viewport={{ once: false }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ duration: 0.5, delay: index * 0.15 }}
                   whileHover={{ scale: 1.02, y: -2 }}
                   className="relative group glass-card p-2 shadow-sm aspect-square lg:aspect-[4/5] cursor-pointer"
                   onClick={() => setSelectedPhoto(photo)}
@@ -789,60 +1027,108 @@ export default function App() {
               ))}
             </div>
             
-            <div className="p-5 glass-card bg-brand-gold/5 border-brand-gold/20 mt-auto">
-              <p className="text-[10px] text-brand-stone-500 uppercase font-black tracking-[0.2em] mb-3 font-display">সরাসরি যোগাযোগ করুন</p>
-              <div className="space-y-3">
-                <p className="text-sm font-bold text-brand-stone-900 flex items-center gap-2 font-sans">
-                  <Mail size={14} className="text-brand-stone-400" />
-                  rashidulhaq015@gmail.com
-                </p>
-                <p className="text-sm font-bold text-brand-stone-900 flex items-center gap-2 font-sans">
-                  <Phone size={14} className="text-brand-stone-400" />
-                  01912196464
-                </p>
-                <div className="flex gap-3 pt-3 no-print">
+            <div className="p-6 bg-white/30 backdrop-blur-xl rounded-[2.5rem] border border-white/60 shadow-[0_8px_32px_rgba(0,0,0,0.02)] mt-auto mt-8">
+              <p className="text-[9px] text-brand-stone-400 uppercase font-black tracking-[0.3em] mb-4 font-display px-1">সরাসরি যোগাযোগ করুন</p>
+              <motion.div 
+                variants={{
+                  hidden: { opacity: 0 },
+                  show: {
+                    opacity: 1,
+                    transition: {
+                      staggerChildren: 0.2
+                    }
+                  }
+                }}
+                initial="hidden"
+                whileInView="show"
+                viewport={{ once: true }}
+                className="space-y-3"
+              >
+                <motion.a 
+                  variants={{
+                    hidden: { opacity: 0, x: -10 },
+                    show: { opacity: 1, x: 0 }
+                  }}
+                  href="mailto:rashidulhaq015@gmail.com"
+                  whileHover={{ x: 6, backgroundColor: "rgba(255, 255, 255, 0.8)", boxShadow: "0 10px 30px -10px rgba(14,165,233,0.2)" }}
+                  className="flex items-center gap-3 bg-white/40 backdrop-blur-md p-3 rounded-2xl border border-white/60 shadow-sm transition-all group"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center border border-sky-100/50 group-hover:bg-sky-500 group-hover:text-white transition-all shadow-sm">
+                    <Mail size={16} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[8px] uppercase tracking-wider text-sky-600/60 font-display font-black leading-none mb-0.5">ইমেইল করুন</span>
+                    <span className="text-[13px] font-bold text-brand-stone-900 font-sans tracking-tight">rashidulhaq015@gmail.com</span>
+                  </div>
+                </motion.a>
+
+                <motion.a 
+                  variants={{
+                    hidden: { opacity: 0, x: -10 },
+                    show: { opacity: 1, x: 0 }
+                  }}
+                  href="tel:01912196464"
+                  whileHover={{ x: 6, backgroundColor: "rgba(255, 255, 255, 0.8)", boxShadow: "0 10px 30px -10px rgba(16,185,129,0.2)" }}
+                  className="flex items-center gap-3 bg-white/40 backdrop-blur-md p-3 rounded-2xl border border-white/60 shadow-sm transition-all group"
+                >
+                  <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center border border-emerald-100/50 group-hover:bg-emerald-500 group-hover:text-white transition-all shadow-sm">
+                    <Phone size={16} />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-[8px] uppercase tracking-wider text-emerald-600/60 font-display font-black leading-none mb-0.5">কল করুন</span>
+                    <span className="text-[13px] font-bold text-brand-stone-900 font-sans tracking-tight">01912196464</span>
+                  </div>
+                </motion.a>
+
+                <motion.div 
+                  variants={{
+                    hidden: { opacity: 0, y: 10 },
+                    show: { opacity: 1, y: 0 }
+                  }}
+                  className="flex gap-3 pt-4 no-print px-1"
+                >
                   <motion.a 
-                    whileHover={{ y: -4, scale: 1.1, rotate: -5 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ y: -6, scale: 1.15, rotate: -3 }}
+                    whileTap={{ scale: 0.95 }}
                     href="http://facebook.com/rashidul.haq0" 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="w-11 h-11 flex items-center justify-center rounded-2xl bg-[#1877F2]/10 backdrop-blur-xl border border-[#1877F2]/20 text-[#1877F2] shadow-sm hover:shadow-[0_10px_25px_-8px_rgba(24,119,242,0.5)] hover:bg-[#1877F2] hover:text-white transition-all duration-500"
+                    className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/80 backdrop-blur-xl border border-white text-[#1877F2] shadow-sm hover:shadow-[0_15px_30px_-10px_rgba(24,119,242,0.4)] transition-all duration-500"
                   >
-                    <Facebook size={20} weight="fill" />
+                    <Facebook size={22} />
                   </motion.a>
                   <motion.a 
-                    whileHover={{ y: -4, scale: 1.1, rotate: 5 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ y: -6, scale: 1.15, rotate: 3 }}
+                    whileTap={{ scale: 0.95 }}
                     href="https://www.instagram.com/md.rashidul.haq/?hl=en" 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="w-11 h-11 flex items-center justify-center rounded-2xl bg-[#E4405F]/10 backdrop-blur-xl border border-[#E4405F]/20 text-[#E4405F] shadow-sm hover:shadow-[0_10px_25px_-8px_rgba(228,64,95,0.5)] hover:bg-gradient-to-tr hover:from-[#f9ce34] hover:via-[#ee2a7b] hover:to-[#6228d7] hover:text-white transition-all duration-500"
+                    className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/80 backdrop-blur-xl border border-white text-[#E4405F] shadow-sm hover:shadow-[0_15px_30px_-10px_rgba(228,64,95,0.4)] transition-all duration-500"
                   >
-                    <Instagram size={20} />
+                    <Instagram size={22} />
                   </motion.a>
                   <motion.a 
-                    whileHover={{ y: -4, scale: 1.1, rotate: -5 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ y: -6, scale: 1.15, rotate: -3 }}
+                    whileTap={{ scale: 0.95 }}
                     href="https://www.linkedin.com/in/rashidulhaq/" 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="w-11 h-11 flex items-center justify-center rounded-2xl bg-[#0A66C2]/10 backdrop-blur-xl border border-[#0A66C2]/20 text-[#0A66C2] shadow-sm hover:shadow-[0_10px_25px_-8px_rgba(10,102,194,0.5)] hover:bg-[#0A66C2] hover:text-white transition-all duration-500"
+                    className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/80 backdrop-blur-xl border border-white text-[#0A66C2] shadow-sm hover:shadow-[0_15px_30px_-10px_rgba(10,102,194,0.4)] transition-all duration-500"
                   >
-                    <Linkedin size={20} />
+                    <Linkedin size={22} />
                   </motion.a>
                   <motion.a 
-                    whileHover={{ y: -4, scale: 1.1, rotate: 5 }}
-                    whileTap={{ scale: 0.9 }}
+                    whileHover={{ y: -6, scale: 1.15, rotate: 3 }}
+                    whileTap={{ scale: 0.95 }}
                     href="https://wa.me/8801912196464" 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="w-11 h-11 flex items-center justify-center rounded-2xl bg-[#25D366]/10 backdrop-blur-xl border border-[#25D366]/20 text-[#25D366] shadow-sm hover:shadow-[0_10px_25px_-8px_rgba(37,211,102,0.5)] hover:bg-[#25D366] hover:text-white transition-all duration-500"
+                    className="w-12 h-12 flex items-center justify-center rounded-2xl bg-white/80 backdrop-blur-xl border border-white text-[#25D366] shadow-sm hover:shadow-[0_15px_30px_-10px_rgba(37,211,102,0.4)] transition-all duration-500"
                   >
-                    <Phone size={20} />
+                    <Phone size={22} />
                   </motion.a>
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </div>
           </motion.aside>
         </main>
@@ -901,7 +1187,7 @@ export default function App() {
           </motion.div>
         )}
       </AnimatePresence>
-      </div>
+    </div>
     </div>
   );
 }
@@ -929,14 +1215,14 @@ function Section({
       initial={{ opacity: 0, ...directions[direction] }}
       whileInView={{ opacity: 1, x: 0, y: 0 }}
       viewport={{ once: false, margin: "-100px" }}
-      transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1] }}
       className={`glass-card group relative overflow-hidden p-6 sm:p-8 flex flex-col gap-6 print-break-inside-avoid shadow-[0_8px_32px_rgba(0,0,0,0.04)] border border-white/40 backdrop-blur-md rounded-3xl ${compact ? 'py-7 px-6' : ''}`}
     >
       {/* Dynamic Background Glow */}
       <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-gold/0 group-hover:bg-brand-gold/10 rounded-full blur-3xl pointer-events-none transition-colors duration-700"></div>
       
       <div className="flex items-center gap-4 relative">
-        <h3 className="text-[10px] font-black text-brand-stone-500 uppercase tracking-[0.3em] font-display transition-colors group-hover:text-brand-gold">
+        <h3 className="text-[10px] font-black text-indigo-600/70 uppercase tracking-[0.3em] font-display transition-colors group-hover:text-emerald-600">
           {title}
         </h3>
         <div className="h-[2px] bg-brand-stone-100 flex-1 relative overflow-hidden rounded-full">
@@ -944,7 +1230,7 @@ function Section({
             initial={{ x: "-100%" }}
             whileInView={{ x: "0%" }}
             viewport={{ once: false }}
-            transition={{ duration: 1.8, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
+            transition={{ duration: 2.2, ease: [0.22, 1, 0.36, 1], delay: 0.6 }}
             className="absolute inset-0 bg-gradient-to-r from-brand-gold/0 via-brand-gold/50 to-brand-gold/0"
           ></motion.div>
         </div>
@@ -955,7 +1241,7 @@ function Section({
           show: {
             opacity: 1,
             transition: {
-              staggerChildren: 0.1
+              staggerChildren: 0.2
             }
           }
         }}
@@ -970,7 +1256,7 @@ function Section({
   );
 }
 
-function CardItem({ children }: { children: React.ReactNode }) {
+function CardItem({ children }: { children: React.ReactNode; key?: React.Key }) : React.JSX.Element {
   return (
     <motion.div 
       variants={{
@@ -979,7 +1265,7 @@ function CardItem({ children }: { children: React.ReactNode }) {
       }}
       whileHover={{ scale: 1.01, x: 4 }}
       transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-      className="p-4 -m-4 rounded-2xl hover:bg-white/40 transition-all duration-300 border border-transparent hover:border-brand-gold/10 group"
+      className="p-4 -m-4 rounded-2xl hover:bg-white/40 transition-all duration-300 border border-transparent hover:border-brand-gold/10 group glass-card"
     >
       {children}
     </motion.div>
